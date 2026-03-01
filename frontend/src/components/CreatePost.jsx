@@ -3,6 +3,7 @@ import { useSocialStore } from "../store/useSocialStore";
 import { useAuthStore } from "../store/useAuthStore";
 import { Image, X } from "lucide-react";
 import toast from "react-hot-toast";
+import vinylImage from "../assets/vinyl.png"; // <-- import vinyl here
 
 const CreatePost = () => {
   const { authUser } = useAuthStore();
@@ -45,7 +46,7 @@ const CreatePost = () => {
     <div className="bg-base-100 rounded-xl shadow border border-base-300 w-full max-w-xl mx-auto p-4">
       <div className="flex gap-3 items-start">
         <img
-          src={authUser?.profilePic || "/avatar.png"}
+          src={authUser?.profilePic || vinylImage} // <-- use vinyl.png as fallback
           alt="profile"
           className="size-10 rounded-full object-cover border border-base-300 flex-shrink-0"
         />
