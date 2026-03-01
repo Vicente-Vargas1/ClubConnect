@@ -1,7 +1,9 @@
+// PostCard.jsx
 import { useState } from "react";
 import { useAuthStore } from "../store/useAuthStore";
 import { useSocialStore } from "../store/useSocialStore";
 import { Heart, MessageCircle, Trash2, Send } from "lucide-react";
+import vinylImage from "../assets/vinyl.png"; // <-- import vinyl here
 import { formatMessageTime } from "../lib/utils";
 
 const PostCard = ({ post }) => {
@@ -12,7 +14,7 @@ const PostCard = ({ post }) => {
   const [commentText, setCommentText] = useState("");
 
   const isLiked = post.likes?.some(
-    (id) => id === authUser._id || id?._id === authUser._id,
+    (id) => id === authUser._id || id?._id === authUser._id
   );
   const isOwner =
     post.userId?._id === authUser._id || post.userId === authUser._id;
@@ -26,14 +28,16 @@ const PostCard = ({ post }) => {
     setCommentText("");
   };
 
+  const fallbackAvatar = vinylImage; // <-- use vinyl.png as fallback
+
   return (
     <div className="bg-base-100 rounded-xl shadow border border-base-300 w-full max-w-xl mx-auto">
       {/* Post Header */}
       <div className="flex items-center justify-between px-4 pt-4 pb-2">
         <div className="flex items-center gap-3">
           <img
-            src={post.userId?.profilePic || "/avatar.png"}
-            alt={post.userId?.fullName}
+            src={post.userId?.profilePic || fallbackAvatar} // <-- fallback here
+            alt={post.userId?.fullName || "User"}
             className="size-10 rounded-full object-cover border border-base-300"
           />
           <div>
@@ -96,9 +100,9 @@ const PostCard = ({ post }) => {
             post.comments.map((c, i) => (
               <div key={i} className="flex gap-2 items-start">
                 <img
-                  src={c.userId?.profilePic || "/avatar.png"}
+                  src={c.userId?.profilePic || fallbackAvatar}
                   className="size-7 rounded-full object-cover border border-base-300 flex-shrink-0"
-                  alt={c.userId?.fullName}
+                  alt={c.userId?.fullName || "User"}
                 />
                 <div className="bg-base-200 rounded-lg px-3 py-1.5 text-sm flex-1">
                   <span className="font-semibold mr-1">
@@ -115,7 +119,7 @@ const PostCard = ({ post }) => {
           {/* Comment input */}
           <form onSubmit={handleComment} className="flex gap-2 mt-2">
             <img
-              src={authUser.profilePic || "/avatar.png"}
+              src={authUser.profilePic || fallbackAvatar}
               className="size-7 rounded-full object-cover border border-base-300 flex-shrink-0"
               alt="you"
             />
