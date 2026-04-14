@@ -3,7 +3,9 @@ import User from "../models/user.model.js";
 import bcrypt from "bcryptjs";
 import cloudinary from "../lib/cloudinary.js";
 
-// ✅ UPDATED SIGNUP
+/* =========================
+   SIGNUP
+========================= */
 export const signup = async (req, res) => {
   const { fullName, email, password, role, profile } = req.body;
 
@@ -34,10 +36,13 @@ export const signup = async (req, res) => {
       password: hashedPassword,
       role,
 
-      profile: {
-        dj: role === "dj" ? profile : undefined,
-        venue: role === "venue" ? profile : undefined,
-      },
+      // ✅ SAFE PROFILE STRUCTURE
+      profile:
+        role === "dj"
+          ? { dj: profile || {} }
+          : role === "venue"
+          ? { venue: profile || {} }
+          : {},
     });
 
     await newUser.save();
@@ -57,9 +62,12 @@ export const signup = async (req, res) => {
   }
 };
 
-// 🔒 unchanged below this point
+/* =========================
+   LOGIN
+========================= */
 export const login = async (req, res) => {
   const { email, password } = req.body;
+
   try {
     const user = await User.findOne({ email });
 
@@ -88,6 +96,9 @@ export const login = async (req, res) => {
   }
 };
 
+/* =========================
+   LOGOUT
+========================= */
 export const logout = (req, res) => {
   try {
     res.cookie("jwt", "", { maxAge: 0 });
@@ -98,6 +109,9 @@ export const logout = (req, res) => {
   }
 };
 
+/* =========================
+   UPDATE PROFILE PIC
+========================= */
 export const updateProfile = async (req, res) => {
   try {
     const { profilePic } = req.body;
@@ -115,13 +129,24 @@ export const updateProfile = async (req, res) => {
       { new: true }
     );
 
-    res.status(200).json(updatedUser);
+    // ✅ CLEAN RESPONSE (IMPORTANT)
+    res.status(200).json({
+      _id: updatedUser._id,
+      fullName: updatedUser.fullName,
+      email: updatedUser.email,
+      profilePic: updatedUser.profilePic,
+      role: updatedUser.role,
+      profile: updatedUser.profile,
+    });
   } catch (error) {
     console.log("error in update profile:", error);
     res.status(500).json({ message: "Internal server error" });
   }
 };
 
+/* =========================
+   AUTH CHECK
+========================= */
 export const checkAuth = (req, res) => {
   try {
     res.status(200).json(req.user);
