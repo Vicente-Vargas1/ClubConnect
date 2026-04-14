@@ -70,9 +70,6 @@ const SignUpPage = () => {
               </div>
 
               <h1 className="text-2xl font-bold">Create Account</h1>
-              <p className="text-base-content/60">
-                Join Club Connect
-              </p>
             </div>
           </div>
 
