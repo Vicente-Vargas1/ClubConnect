@@ -16,62 +16,64 @@ import { Loader } from "lucide-react";
 import { Toaster } from "react-hot-toast";
 
 const App = () => {
-  const { authUser, checkAuth, isCheckingAuth, onlineUsers } = useAuthStore();
+  const { authUser, checkAuth, isCheckingAuth } = useAuthStore();
   const { theme } = useThemeStore();
-
-  console.log({ onlineUsers });
 
   useEffect(() => {
     checkAuth();
-  }, [checkAuth]);
+  }, []);
 
-  console.log({ authUser });
-
-  if (isCheckingAuth && !authUser)
+  if (isCheckingAuth && !authUser) {
     return (
       <div className="flex items-center justify-center h-screen">
-        <Loader className="size-10 animate-spin" />
+        <Loader className="animate-spin size-10" />
       </div>
     );
+  }
 
   return (
     <div data-theme={theme}>
       <Navbar />
 
-     <Routes>
-  <Route
-    path="/"
-    element={authUser ? <SocialPage /> : <Navigate to="/login" />}
-  />
+      <Routes>
+        {/* SOCIAL FEED HOME */}
+        <Route
+          path="/"
+          element={authUser ? <SocialPage /> : <Navigate to="/login" />}
+        />
 
-  <Route
-    path="/chat"
-    element={authUser ? <HomePage /> : <Navigate to="/login" />}
-  />
+        {/* CHAT PAGE */}
+        <Route
+          path="/chat"
+          element={authUser ? <HomePage /> : <Navigate to="/login" />}
+        />
 
-  <Route
-    path="/signup"
-    element={!authUser ? <SignUpPage /> : <Navigate to="/" />}
-  />
+        {/* AUTH */}
+        <Route path="/signup" element={<SignUpPage />} />
+        <Route path="/login" element={<LoginPage />} />
 
-  <Route
-    path="/login"
-    element={!authUser ? <LoginPage /> : <Navigate to="/" />}
-  />
+        {/* SETTINGS */}
+        <Route
+          path="/settings"
+          element={authUser ? <SettingsPage /> : <Navigate to="/login" />}
+        />
 
-  <Route
-    path="/settings"
-    element={authUser ? <SettingsPage /> : <Navigate to="/login" />}
-  />
+        {/* PROFILE (SELF) */}
+        <Route
+          path="/profile"
+          element={authUser ? <ProfilePage /> : <Navigate to="/login" />}
+        />
 
-  <Route
-    path="/profile"
-    element={authUser ? <ProfilePage /> : <Navigate to="/login" />}
-  />
-</Routes>
+        {/* PROFILE (OTHER USERS) */}
+        <Route
+          path="/profile/:id"
+          element={authUser ? <ProfilePage /> : <Navigate to="/login" />}
+        />
+      </Routes>
 
       <Toaster />
     </div>
   );
 };
+
 export default App;
