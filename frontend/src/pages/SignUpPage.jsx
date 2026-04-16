@@ -1,20 +1,21 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useAuthStore } from "../store/useAuthStore";
 import {
   Eye,
   EyeOff,
   Loader2,
-  Lock,
-  Mail,
   MessageSquare,
-  User,
 } from "lucide-react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import toast from "react-hot-toast";
 
 import djController from "../assets/dj-controller.png";
 
 const SignUpPage = () => {
+  const navigate = useNavigate();
+
+  const { signup, isSigningUp, authUser } = useAuthStore();
+
   const [showPassword, setShowPassword] = useState(false);
 
   const [formData, setFormData] = useState({
@@ -26,7 +27,12 @@ const SignUpPage = () => {
   const [role, setRole] = useState(null);
   const [profileData, setProfileData] = useState({});
 
-  const { signup, isSigningUp } = useAuthStore();
+  // ✅ AUTO REDIRECT FIX
+  useEffect(() => {
+    if (authUser) {
+      navigate("/");
+    }
+  }, [authUser, navigate]);
 
   const validateForm = () => {
     if (!formData.fullName.trim()) return toast.error("Full name is required");
@@ -46,13 +52,13 @@ const SignUpPage = () => {
     e.preventDefault();
 
     const success = validateForm();
-    if (success === true) {
-      signup({
-        ...formData,
-        role,
-        profile: profileData,
-      });
-    }
+    if (!success) return;
+
+    signup({
+      ...formData,
+      role,
+      profile: profileData,
+    });
   };
 
   return (
@@ -262,10 +268,7 @@ const SignUpPage = () => {
       <div className="hidden lg:flex flex-col items-center justify-center bg-base-200">
         <h1 className="text-4xl font-bold mb-8">Club Connect</h1>
 
-        <img
-          src={djController}
-          className="w-2/3 max-w-sm"
-        />
+        <img src={djController} className="w-2/3 max-w-sm" />
 
         <p className="mt-6 text-center text-base-content/70">
           Booking DJs made simple
