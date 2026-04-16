@@ -115,7 +115,6 @@ const ProfilePage = () => {
               <p>Genres: {user.profile.dj.genres?.join(", ")}</p>
               <p>Instagram: {user.profile.dj.instagram}</p>
               <p>SoundCloud: {user.profile.dj.soundcloud}</p>
-              <p>YouTube: {user.profile.dj.youtube}</p>
             </div>
           )}
 
@@ -127,8 +126,6 @@ const ProfilePage = () => {
               <p>Location: {user.profile.venue.location}</p>
               <p>Capacity: {user.profile.venue.capacity}</p>
               <p>Type: {user.profile.venue.venueType}</p>
-              <p>Email: {user.profile.venue.contactEmail}</p>
-              <p>Description: {user.profile.venue.description}</p>
             </div>
           )}
 
