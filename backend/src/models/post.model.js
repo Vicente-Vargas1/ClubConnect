@@ -37,6 +37,11 @@ const postSchema = new mongoose.Schema(
       },
     ],
     comments: [commentSchema],
+    location: {
+      name: { type: String, default: "" },
+      lat: { type: Number },
+      lng: { type: Number },
+    },
   },
   { timestamps: true },
 );

@@ -7,6 +7,7 @@ import {
   User,
   LayoutGrid,
   MessageCircle,
+  Map,
 } from "lucide-react";
 
 const Navbar = () => {
@@ -42,11 +43,19 @@ const Navbar = () => {
               </Link>
             )}
 
-            {/* 💬 CHAT BUTTON (NEW) */}
+            {/* 💬 CHAT BUTTON */}
             {authUser && (
               <Link to="/chat" className="btn btn-sm gap-2 transition-colors">
                 <MessageCircle className="w-4 h-4" />
                 <span className="hidden sm:inline">Chat</span>
+              </Link>
+            )}
+
+            {/* 🗺️ EXPLORE MAP */}
+            {authUser && (
+              <Link to="/explore" className="btn btn-sm gap-2 transition-colors">
+                <Map className="w-4 h-4" />
+                <span className="hidden sm:inline">Explore</span>
               </Link>
             )}
 

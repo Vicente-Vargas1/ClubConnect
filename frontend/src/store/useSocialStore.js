@@ -4,6 +4,7 @@ import toast from "react-hot-toast";
 
 export const useSocialStore = create((set, get) => ({
   posts: [],
+  sortBy: "newest", // "newest" | "popular"
   isLoadingPosts: false,
   isCreatingPost: false,
 
@@ -19,10 +20,10 @@ export const useSocialStore = create((set, get) => ({
     }
   },
 
-  createPost: async ({ text, image }) => {
+  createPost: async ({ text, image, location }) => {
     set({ isCreatingPost: true });
     try {
-      const res = await axiosInstance.post("/posts", { text, image });
+      const res = await axiosInstance.post("/posts", { text, image, location });
       set({ posts: [res.data, ...get().posts] });
       toast.success("Post created!");
     } catch (error) {
@@ -68,5 +69,21 @@ export const useSocialStore = create((set, get) => ({
     } catch (error) {
       toast.error(error.response?.data?.message || "Failed to delete post");
     }
+  },
+
+  setSortBy: (sortBy) => set({ sortBy }),
+
+  getSortedPosts: () => {
+    const { posts, sortBy } = get();
+    if (sortBy === "popular") {
+      return [...posts].sort(
+        (a, b) =>
+          (b.likes.length + b.comments.length) -
+          (a.likes.length + a.comments.length)
+      );
+    }
+    return [...posts].sort(
+      (a, b) => new Date(b.createdAt) - new Date(a.createdAt)
+    );
   },
 }));

@@ -19,7 +19,7 @@ export const getPosts = async (req, res) => {
 // Create a new post
 export const createPost = async (req, res) => {
   try {
-    const { text, image } = req.body;
+    const { text, image, location } = req.body;
     const userId = req.user._id;
 
     if (!text && !image) {
@@ -34,7 +34,7 @@ export const createPost = async (req, res) => {
       imageUrl = uploadRes.secure_url;
     }
 
-    const post = new Post({ userId, text, image: imageUrl });
+    const post = new Post({ userId, text, image: imageUrl, location: location || {} });
     await post.save();
 
     await post.populate("userId", "fullName profilePic");
