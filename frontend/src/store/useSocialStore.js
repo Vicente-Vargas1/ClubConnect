@@ -5,6 +5,7 @@ import toast from "react-hot-toast";
 export const useSocialStore = create((set, get) => ({
   posts: [],
   sortBy: "newest", // "newest" | "popular"
+  feedMode: "all", // "all" | "following"
   isLoadingPosts: false,
   isCreatingPost: false,
 
@@ -12,7 +13,7 @@ export const useSocialStore = create((set, get) => ({
     set({ isLoadingPosts: true });
     try {
       const res = await axiosInstance.get("/posts");
-      set({ posts: res.data });
+      set({ posts: res.data, feedMode: "all" });
     } catch (error) {
       toast.error(error.response?.data?.message || "Failed to load posts");
     } finally {
@@ -20,12 +21,25 @@ export const useSocialStore = create((set, get) => ({
     }
   },
 
-  createPost: async ({ text, image, location }) => {
+  fetchFollowingPosts: async () => {
+    set({ isLoadingPosts: true });
+    try {
+      const res = await axiosInstance.get("/posts/following");
+      set({ posts: res.data, feedMode: "following" });
+    } catch (error) {
+      toast.error(error.response?.data?.message || "Failed to load following feed");
+    } finally {
+      set({ isLoadingPosts: false });
+    }
+  },
+
+  createPost: async ({ text, image, location, postType, lookingForDJ }) => {
     set({ isCreatingPost: true });
     try {
-      const res = await axiosInstance.post("/posts", { text, image, location });
+      const res = await axiosInstance.post("/posts", { text, image, location, postType, lookingForDJ });
       set({ posts: [res.data, ...get().posts] });
       toast.success("Post created!");
+      return res.data;
     } catch (error) {
       toast.error(error.response?.data?.message || "Failed to create post");
     } finally {

@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from "react";
 import { ArrowLeft, Loader, Send, X } from "lucide-react";
 import { useChatStore } from "../store/useChatStore";
 import { useAuthStore } from "../store/useAuthStore";
+import { formatMessageTime } from "../lib/utils";
 import vinylImage from "../assets/vinyl.png";
 
 const ChatPopup = () => {
@@ -141,21 +142,28 @@ const ChatPopup = () => {
                     key={msg._id || i}
                     className={`flex ${isMine ? "justify-end" : "justify-start"}`}
                   >
-                    <div
-                      className={`max-w-[75%] rounded-xl px-3 py-2 text-sm break-words ${
-                        isMine
-                          ? "bg-primary text-primary-content rounded-br-none"
-                          : "bg-base-200 rounded-bl-none"
-                      }`}
-                    >
-                      {msg.image && (
-                        <img
-                          src={msg.image}
-                          alt=""
-                          className="rounded-lg mb-1 max-w-full"
-                        />
+                    <div className="flex flex-col gap-0.5">
+                      <div
+                        className={`max-w-[75%] rounded-xl px-3 py-2 text-sm break-words ${
+                          isMine
+                            ? "bg-primary text-primary-content rounded-br-none"
+                            : "bg-base-200 rounded-bl-none"
+                        }`}
+                      >
+                        {msg.image && (
+                          <img
+                            src={msg.image}
+                            alt=""
+                            className="rounded-lg mb-1 max-w-full"
+                          />
+                        )}
+                        {msg.text}
+                      </div>
+                      {msg.createdAt && (
+                        <span className={`text-[10px] text-base-content/40 ${isMine ? "text-right" : "text-left"}`}>
+                          {formatMessageTime(msg.createdAt)}
+                        </span>
                       )}
-                      {msg.text}
                     </div>
                   </div>
                 );

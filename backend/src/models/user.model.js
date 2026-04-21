@@ -31,6 +31,9 @@ const userSchema = new mongoose.Schema(
       required: true,
     },
 
+    following: [{ type: mongoose.Schema.Types.ObjectId, ref: "User", default: [] }],
+    followers: [{ type: mongoose.Schema.Types.ObjectId, ref: "User", default: [] }],
+
     // ✅ NEW: role-specific profile data
     profile: {
       dj: {

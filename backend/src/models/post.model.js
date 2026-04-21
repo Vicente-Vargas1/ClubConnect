@@ -42,6 +42,25 @@ const postSchema = new mongoose.Schema(
       lat: { type: Number },
       lng: { type: Number },
     },
+    postType: {
+      type: String,
+      enum: ["regular", "lookingForDJ"],
+      default: "regular",
+    },
+    lookingForDJ: {
+      date: Date,
+      time: String,
+      venueName: String,
+      pay: String,
+      genre: String,
+      eventDescription: String,
+      interestedUsers: [{ type: mongoose.Schema.Types.ObjectId, ref: "User" }],
+      bookingId: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: "Booking",
+        default: null,
+      },
+    },
   },
   { timestamps: true },
 );

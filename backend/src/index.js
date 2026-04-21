@@ -10,6 +10,9 @@ import { connectDB } from "./lib/db.js";
 import authRoutes from "./routes/auth.route.js";
 import messageRoutes from "./routes/message.route.js";
 import postRoutes from "./routes/post.route.js";
+import followRoutes from "./routes/follow.route.js";
+import reviewRoutes from "./routes/review.route.js";
+import bookingRoutes from "./routes/booking.route.js";
 import { app, server } from "./lib/socket.js";
 
 dotenv.config();
@@ -30,6 +33,9 @@ app.use(
 app.use("/api/auth", authRoutes);
 app.use("/api/messages", messageRoutes);
 app.use("/api/posts", postRoutes);
+app.use("/api/follow", followRoutes);
+app.use("/api/reviews", reviewRoutes);
+app.use("/api/bookings", bookingRoutes);
 
 // ✅ Production frontend serving
 if (process.env.NODE_ENV === "production") {

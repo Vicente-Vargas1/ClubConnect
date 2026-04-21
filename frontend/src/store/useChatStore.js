@@ -9,6 +9,7 @@ let chatMessageHandler = null;
 export const useChatStore = create((set, get) => ({
   messages: [],
   users: [],
+  recentContacts: [],
   selectedUser: null,
   isUsersLoading: false,
   isMessagesLoading: false,
@@ -32,6 +33,15 @@ export const useChatStore = create((set, get) => ({
       toast.error(error.response.data.message);
     } finally {
       set({ isUsersLoading: false });
+    }
+  },
+
+  getRecentContacts: async () => {
+    try {
+      const res = await axiosInstance.get("/messages/recent-contacts");
+      set({ recentContacts: res.data, users: res.data });
+    } catch (error) {
+      console.error("Failed to load recent contacts");
     }
   },
 

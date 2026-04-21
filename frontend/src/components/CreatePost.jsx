@@ -1,5 +1,5 @@
 import { useRef, useState } from "react";
-import { Image, MapPin, X } from "lucide-react";
+import { Image, MapPin, X, Music } from "lucide-react";
 import { MapContainer, TileLayer, Marker, useMapEvents } from "react-leaflet";
 import L from "leaflet";
 import "leaflet/dist/leaflet.css";
@@ -32,6 +32,17 @@ const CreatePost = () => {
   const [pickedLatLng, setPickedLatLng] = useState(null);
   const fileInputRef = useRef(null);
 
+  // Looking for DJ mode (venue only)
+  const [isLookingForDJ, setIsLookingForDJ] = useState(false);
+  const [djForm, setDjForm] = useState({
+    date: "",
+    time: "",
+    venueName: "",
+    pay: "",
+    genre: "",
+    eventDescription: "",
+  });
+
   const handleImageChange = (e) => {
     const file = e.target.files[0];
     if (!file) return;
@@ -57,20 +68,38 @@ const CreatePost = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    if (!text.trim() && !imagePreview) {
-      toast.error("Add some text or an image");
-      return;
+
+    if (isLookingForDJ) {
+      if (!djForm.date || !djForm.venueName) {
+        toast.error("Date and venue name are required");
+        return;
+      }
+      await createPost({
+        text: text.trim(),
+        image: imagePreview,
+        location: pickedLatLng && locationName.trim()
+          ? { name: locationName.trim(), lat: pickedLatLng.lat, lng: pickedLatLng.lng }
+          : undefined,
+        postType: "lookingForDJ",
+        lookingForDJ: djForm,
+      });
+    } else {
+      if (!text.trim() && !imagePreview) {
+        toast.error("Add some text or an image");
+        return;
+      }
+      const location =
+        pickedLatLng && locationName.trim()
+          ? { name: locationName.trim(), lat: pickedLatLng.lat, lng: pickedLatLng.lng }
+          : undefined;
+      await createPost({ text: text.trim(), image: imagePreview, location });
     }
 
-    const location =
-      pickedLatLng && locationName.trim()
-        ? { name: locationName.trim(), lat: pickedLatLng.lat, lng: pickedLatLng.lng }
-        : undefined;
-
-    await createPost({ text: text.trim(), image: imagePreview, location });
     setText("");
     setImagePreview(null);
     removeLocation();
+    setIsLookingForDJ(false);
+    setDjForm({ date: "", time: "", venueName: "", pay: "", genre: "", eventDescription: "" });
     if (fileInputRef.current) fileInputRef.current.value = "";
   };
 
@@ -83,13 +112,110 @@ const CreatePost = () => {
           className="size-10 rounded-full object-cover border border-base-300 flex-shrink-0"
         />
         <form onSubmit={handleSubmit} className="flex-1 space-y-3">
-          <textarea
-            value={text}
-            onChange={(e) => setText(e.target.value)}
-            placeholder="What's on your mind?"
-            rows={2}
-            className="textarea textarea-bordered w-full resize-none text-sm"
-          />
+
+          {/* Looking for DJ toggle (venue only) */}
+          {authUser?.role === "venue" && (
+            <div className="flex items-center gap-2">
+              <button
+                type="button"
+                onClick={() => setIsLookingForDJ((v) => !v)}
+                className={`btn btn-xs gap-1.5 ${isLookingForDJ ? "btn-secondary" : "btn-ghost border"}`}
+              >
+                <Music className="size-3.5" />
+                Looking for a DJ?
+              </button>
+            </div>
+          )}
+
+          {/* Looking for DJ fields */}
+          {isLookingForDJ && (
+            <div className="bg-secondary/10 border border-secondary/30 rounded-lg p-3 space-y-2">
+              <p className="text-xs font-semibold text-secondary uppercase tracking-wide">DJ Booking Request</p>
+              <div className="grid grid-cols-2 gap-2">
+                <div>
+                  <label className="text-xs text-base-content/60">Date *</label>
+                  <input
+                    type="date"
+                    className="input input-bordered input-sm w-full"
+                    value={djForm.date}
+                    onChange={(e) => setDjForm({ ...djForm, date: e.target.value })}
+                  />
+                </div>
+                <div>
+                  <label className="text-xs text-base-content/60">Time</label>
+                  <input
+                    type="text"
+                    placeholder="e.g. 9:00 PM"
+                    className="input input-bordered input-sm w-full"
+                    value={djForm.time}
+                    onChange={(e) => setDjForm({ ...djForm, time: e.target.value })}
+                  />
+                </div>
+              </div>
+              <div>
+                <label className="text-xs text-base-content/60">Venue Name *</label>
+                <input
+                  type="text"
+                  placeholder="Venue name"
+                  className="input input-bordered input-sm w-full"
+                  value={djForm.venueName}
+                  onChange={(e) => setDjForm({ ...djForm, venueName: e.target.value })}
+                />
+              </div>
+              <div className="grid grid-cols-2 gap-2">
+                <div>
+                  <label className="text-xs text-base-content/60">Pay</label>
+                  <input
+                    type="text"
+                    placeholder="e.g. $500"
+                    className="input input-bordered input-sm w-full"
+                    value={djForm.pay}
+                    onChange={(e) => setDjForm({ ...djForm, pay: e.target.value })}
+                  />
+                </div>
+                <div>
+                  <label className="text-xs text-base-content/60">Genre / Style</label>
+                  <input
+                    type="text"
+                    placeholder="e.g. House, Techno"
+                    className="input input-bordered input-sm w-full"
+                    value={djForm.genre}
+                    onChange={(e) => setDjForm({ ...djForm, genre: e.target.value })}
+                  />
+                </div>
+              </div>
+              <div>
+                <label className="text-xs text-base-content/60">Event Description</label>
+                <textarea
+                  placeholder="Tell DJs about the event…"
+                  rows={2}
+                  className="textarea textarea-bordered textarea-sm w-full resize-none"
+                  value={djForm.eventDescription}
+                  onChange={(e) => setDjForm({ ...djForm, eventDescription: e.target.value })}
+                />
+              </div>
+            </div>
+          )}
+
+          {!isLookingForDJ && (
+            <textarea
+              value={text}
+              onChange={(e) => setText(e.target.value)}
+              placeholder="What's on your mind?"
+              rows={2}
+              className="textarea textarea-bordered w-full resize-none text-sm"
+            />
+          )}
+
+          {isLookingForDJ && (
+            <textarea
+              value={text}
+              onChange={(e) => setText(e.target.value)}
+              placeholder="Additional details… (optional)"
+              rows={1}
+              className="textarea textarea-bordered w-full resize-none text-sm"
+            />
+          )}
 
           {/* Image preview */}
           {imagePreview && (
@@ -181,7 +307,7 @@ const CreatePost = () => {
             </div>
             <button
               type="submit"
-              disabled={isCreatingPost || (!text.trim() && !imagePreview)}
+              disabled={isCreatingPost}
               className="btn btn-primary btn-sm"
             >
               {isCreatingPost ? "Posting…" : "Post"}

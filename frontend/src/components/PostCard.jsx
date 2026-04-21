@@ -1,10 +1,12 @@
 import { useState } from "react";
 import { useAuthStore } from "../store/useAuthStore";
 import { useSocialStore } from "../store/useSocialStore";
-import { Heart, MessageCircle, Trash2, Send } from "lucide-react";
+import { axiosInstance } from "../lib/axios";
+import { Heart, MessageCircle, Trash2, Send, Calendar, Clock, MapPin, DollarSign, Music, Check } from "lucide-react";
 import vinylImage from "../assets/vinyl.png";
 import { formatMessageTime } from "../lib/utils";
 import { Link } from "react-router-dom";
+import toast from "react-hot-toast";
 
 const PostCard = ({ post }) => {
   const { authUser } = useAuthStore();
@@ -12,6 +14,8 @@ const PostCard = ({ post }) => {
 
   const [showComments, setShowComments] = useState(false);
   const [commentText, setCommentText] = useState("");
+  const [interestedUsers, setInterestedUsers] = useState(post.lookingForDJ?.interestedUsers || []);
+  const [interestLoading, setInterestLoading] = useState(false);
 
   const fallbackAvatar = vinylImage;
 
@@ -22,6 +26,10 @@ const PostCard = ({ post }) => {
   const isOwner =
     post.userId?._id === authUser._id || post.userId === authUser._id;
 
+  const isInterested = interestedUsers.some(
+    (id) => id === authUser._id || id?._id === authUser._id || id?.toString() === authUser._id
+  );
+
   const handleLike = () => toggleLike(post._id);
 
   const handleComment = (e) => {
@@ -30,6 +38,131 @@ const PostCard = ({ post }) => {
     addComment(post._id, commentText.trim());
     setCommentText("");
   };
+
+  const handleInterest = async () => {
+    if (authUser.role !== "dj") return;
+    setInterestLoading(true);
+    try {
+      const res = await axiosInstance.put(`/posts/${post._id}/interested`);
+      setInterestedUsers(res.data.interestedUsers);
+      toast.success(isInterested ? "Interest removed" : "Interest expressed!");
+    } catch (err) {
+      toast.error(err.response?.data?.message || "Failed to update interest");
+    } finally {
+      setInterestLoading(false);
+    }
+  };
+
+  const isLookingForDJ = post.postType === "lookingForDJ";
+  const djData = post.lookingForDJ;
+  const isExpired = djData?.date && new Date(djData.date) < new Date();
+  const isFilled = Boolean(djData?.bookingId);
+
+  if (isLookingForDJ) {
+    return (
+      <div className="bg-base-100 rounded-xl shadow border-2 border-secondary w-full max-w-xl mx-auto">
+
+        {/* Banner */}
+        <div className="bg-secondary/20 px-4 pt-3 pb-2 flex items-center gap-2">
+          <Music className="size-4 text-secondary" />
+          <span className="text-secondary font-semibold text-sm uppercase tracking-wide">
+            Looking for a DJ
+          </span>
+          {(isExpired || isFilled) && (
+            <span className="ml-auto badge badge-sm badge-ghost">
+              {isFilled ? "Filled" : "Expired"}
+            </span>
+          )}
+        </div>
+
+        {/* Header */}
+        <div className="flex items-center justify-between px-4 pt-3 pb-1">
+          <div className="flex items-center gap-3">
+            <Link to={`/profile/${post.userId?._id}`}>
+              <img
+                src={post.userId?.profilePic || fallbackAvatar}
+                alt="user"
+                className="size-9 rounded-full object-cover border border-base-300 cursor-pointer"
+              />
+            </Link>
+            <div>
+              <Link to={`/profile/${post.userId?._id}`}>
+                <p className="font-semibold text-sm hover:underline">{post.userId?.fullName}</p>
+              </Link>
+              <p className="text-xs text-base-content/50">{formatMessageTime(post.createdAt)}</p>
+            </div>
+          </div>
+          {isOwner && (
+            <button onClick={() => deletePost(post._id)} className="btn btn-ghost btn-xs text-error">
+              <Trash2 className="size-4" />
+            </button>
+          )}
+        </div>
+
+        {/* DJ details */}
+        <div className="px-4 py-3 space-y-1.5">
+          {djData?.venueName && (
+            <div className="flex items-center gap-2 text-sm">
+              <MapPin className="size-4 text-base-content/50 flex-shrink-0" />
+              <span className="font-medium">{djData.venueName}</span>
+            </div>
+          )}
+          <div className="flex items-center gap-4 text-sm text-base-content/70">
+            {djData?.date && (
+              <span className="flex items-center gap-1">
+                <Calendar className="size-3.5" />
+                {new Date(djData.date).toLocaleDateString()}
+              </span>
+            )}
+            {djData?.time && (
+              <span className="flex items-center gap-1">
+                <Clock className="size-3.5" />
+                {djData.time}
+              </span>
+            )}
+            {djData?.pay && (
+              <span className="flex items-center gap-1">
+                <DollarSign className="size-3.5" />
+                {djData.pay}
+              </span>
+            )}
+          </div>
+          {djData?.genre && (
+            <p className="text-sm text-base-content/70">
+              <span className="font-medium">Genre:</span> {djData.genre}
+            </p>
+          )}
+          {djData?.eventDescription && (
+            <p className="text-sm text-base-content/80">{djData.eventDescription}</p>
+          )}
+          {post.text && <p className="text-sm mt-1">{post.text}</p>}
+        </div>
+
+        {post.image && (
+          <img src={post.image} className="w-full max-h-[480px] object-cover" />
+        )}
+
+        {/* Actions */}
+        <div className="flex items-center gap-4 px-4 py-3 border-t border-base-200">
+          {authUser.role === "dj" && !isExpired && !isFilled && (
+            <button
+              onClick={handleInterest}
+              disabled={interestLoading}
+              className={`flex items-center gap-1.5 text-sm btn btn-xs ${
+                isInterested ? "btn-secondary" : "btn-ghost border"
+              }`}
+            >
+              {isInterested ? <Check className="size-3.5" /> : <Music className="size-3.5" />}
+              {isInterested ? "Interested ✓" : "I'm Interested"}
+            </button>
+          )}
+          <span className="text-xs text-base-content/50 ml-auto">
+            {interestedUsers.length} DJ{interestedUsers.length !== 1 ? "s" : ""} interested
+          </span>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="bg-base-100 rounded-xl shadow border border-base-300 w-full max-w-xl mx-auto">

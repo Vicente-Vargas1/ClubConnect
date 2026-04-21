@@ -55,6 +55,8 @@ export const signup = async (req, res) => {
       profilePic: newUser.profilePic,
       role: newUser.role,
       profile: newUser.profile,
+      following: newUser.following,
+      followers: newUser.followers,
     });
   } catch (error) {
     console.log("Error in signup controller", error.message);
@@ -89,6 +91,8 @@ export const login = async (req, res) => {
       profilePic: user.profilePic,
       role: user.role,
       profile: user.profile,
+      following: user.following,
+      followers: user.followers,
     });
   } catch (error) {
     console.log("Error in login controller", error.message);
@@ -137,6 +141,8 @@ export const updateProfile = async (req, res) => {
       profilePic: updatedUser.profilePic,
       role: updatedUser.role,
       profile: updatedUser.profile,
+      following: updatedUser.following,
+      followers: updatedUser.followers,
     });
   } catch (error) {
     console.log("error in update profile:", error);
