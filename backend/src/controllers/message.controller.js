@@ -16,6 +16,72 @@ export const getUsersForSidebar = async (req, res) => {
   }
 };
 
+export const getRecentContacts = async (req, res) => {
+  try {
+    const myId = req.user._id;
+
+    // Get all messages involving the current user, newest first
+    const messages = await Message.find({
+      $or: [{ senderId: myId }, { receiverId: myId }],
+    }).sort({ createdAt: -1 });
+
+    // Build a map of userId -> most recent message
+    const contactMap = new Map();
+    for (const msg of messages) {
+      const otherId = msg.senderId.equals(myId)
+        ? msg.receiverId.toString()
+        : msg.senderId.toString();
+      if (!contactMap.has(otherId)) {
+        contactMap.set(otherId, msg);
+      }
+    }
+
+    // Fetch all other users, ordered: chatted users first (by recency), then the rest
+    const allUsers = await User.find({ _id: { $ne: myId } }).select("-password");
+
+    const chattedIds = [...contactMap.keys()];
+    const chattedUsers = [];
+    const restUsers = [];
+
+    for (const user of allUsers) {
+      if (chattedIds.includes(user._id.toString())) {
+        chattedUsers.push(user);
+      } else {
+        restUsers.push(user);
+      }
+    }
+
+    // Sort chatted users by recency
+    chattedUsers.sort((a, b) => {
+      const aTime = contactMap.get(a._id.toString())?.createdAt || 0;
+      const bTime = contactMap.get(b._id.toString())?.createdAt || 0;
+      return new Date(bTime) - new Date(aTime);
+    });
+
+    const result = [...chattedUsers, ...restUsers].map((user) => {
+      const lastMsg = contactMap.get(user._id.toString());
+      return {
+        ...user.toObject(),
+        lastMessage: lastMsg
+          ? {
+              text: lastMsg.text
+                ? lastMsg.text.substring(0, 40) + (lastMsg.text.length > 40 ? "…" : "")
+                : lastMsg.image
+                ? "📷 Image"
+                : "",
+              createdAt: lastMsg.createdAt,
+            }
+          : null,
+      };
+    });
+
+    res.status(200).json(result);
+  } catch (error) {
+    console.error("Error in getRecentContacts:", error.message);
+    res.status(500).json({ error: "Internal server error" });
+  }
+};
+
 export const getMessages = async (req, res) => {
   try {
     const { id: userToChatId } = req.params;
