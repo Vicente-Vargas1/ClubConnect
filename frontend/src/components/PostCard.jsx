@@ -3,7 +3,7 @@ import { useAuthStore } from "../store/useAuthStore";
 import { useSocialStore } from "../store/useSocialStore";
 import { useChatStore } from "../store/useChatStore";
 import { axiosInstance } from "../lib/axios";
-import { Heart, MessageCircle, Trash2, Send, Calendar, Clock, MapPin, DollarSign, Music, Check, X } from "lucide-react";
+import { Heart, MessageCircle, Trash2, Send, Calendar, Clock, MapPin, DollarSign, Music, Check, X, AlertTriangle } from "lucide-react";
 import vinylImage from "../assets/vinyl.png";
 import { formatMessageTime, formatTimeTo12Hr, parseMentions } from "../lib/utils";
 import { Link } from "react-router-dom";
@@ -17,6 +17,7 @@ const PostCard = ({ post }) => {
   const [commentText, setCommentText] = useState("");
   const [interestLoading, setInterestLoading] = useState(false);
   const [showInterestedModal, setShowInterestedModal] = useState(false);
+  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
 
   const interestedUsers = post.lookingForDJ?.interestedUsers || [];
 
@@ -119,7 +120,7 @@ const PostCard = ({ post }) => {
             </div>
           </div>
           {isOwner && (
-            <button onClick={() => deletePost(post._id)} className="btn btn-ghost btn-xs text-error">
+            <button onClick={() => setShowDeleteConfirm(true)} className="btn btn-ghost btn-xs text-error">
               <Trash2 className="size-4" />
             </button>
           )}
@@ -195,6 +196,26 @@ const PostCard = ({ post }) => {
             </span>
           )}
         </div>
+
+        {showDeleteConfirm && (
+          <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4" onClick={() => setShowDeleteConfirm(false)}>
+            <div className="bg-base-100 rounded-xl p-6 w-full max-w-sm space-y-4" onClick={(e) => e.stopPropagation()}>
+              <div className="flex items-center gap-3">
+                <div className="size-10 rounded-full bg-error/10 flex items-center justify-center flex-shrink-0">
+                  <AlertTriangle className="size-5 text-error" />
+                </div>
+                <div>
+                  <h3 className="font-bold">Delete post?</h3>
+                  <p className="text-sm text-base-content/60">This cannot be undone.</p>
+                </div>
+              </div>
+              <div className="flex gap-3">
+                <button onClick={() => setShowDeleteConfirm(false)} className="btn btn-ghost flex-1">Cancel</button>
+                <button onClick={() => { deletePost(post._id); setShowDeleteConfirm(false); }} className="btn btn-error flex-1">Delete</button>
+              </div>
+            </div>
+          </div>
+        )}
 
         {showInterestedModal && (
           <div
@@ -285,7 +306,7 @@ const PostCard = ({ post }) => {
 
         {isOwner && (
           <button
-            onClick={() => deletePost(post._id)}
+            onClick={() => setShowDeleteConfirm(true)}
             className="btn btn-ghost btn-xs text-error"
           >
             <Trash2 className="size-4" />
@@ -327,6 +348,26 @@ const PostCard = ({ post }) => {
           <span>{post.comments?.length ?? 0}</span>
         </button>
       </div>
+
+      {showDeleteConfirm && (
+        <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4" onClick={() => setShowDeleteConfirm(false)}>
+          <div className="bg-base-100 rounded-xl p-6 w-full max-w-sm space-y-4" onClick={(e) => e.stopPropagation()}>
+            <div className="flex items-center gap-3">
+              <div className="size-10 rounded-full bg-error/10 flex items-center justify-center flex-shrink-0">
+                <AlertTriangle className="size-5 text-error" />
+              </div>
+              <div>
+                <h3 className="font-bold">Delete post?</h3>
+                <p className="text-sm text-base-content/60">This cannot be undone.</p>
+              </div>
+            </div>
+            <div className="flex gap-3">
+              <button onClick={() => setShowDeleteConfirm(false)} className="btn btn-ghost flex-1">Cancel</button>
+              <button onClick={() => { deletePost(post._id); setShowDeleteConfirm(false); }} className="btn btn-error flex-1">Delete</button>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* COMMENTS */}
       {showComments && (

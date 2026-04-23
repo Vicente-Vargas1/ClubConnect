@@ -163,6 +163,62 @@ export const checkAuth = (req, res) => {
 };
 
 /* =========================
+   UPDATE PROFILE FIELDS (bio, location, genres, social links, etc.)
+========================= */
+export const updateProfileData = async (req, res) => {
+  try {
+    const userId = req.user._id;
+    const user = await User.findById(userId);
+    if (!user) return res.status(404).json({ message: "User not found" });
+
+    if (user.role === "dj") {
+      const { bio, location, genres, instagram, soundcloud } = req.body;
+      user.profile = {
+        ...user.profile?.toObject?.() || user.profile,
+        dj: {
+          ...(user.profile?.dj?.toObject?.() || user.profile?.dj || {}),
+          ...(bio !== undefined && { bio }),
+          ...(location !== undefined && { location }),
+          ...(genres !== undefined && { genres }),
+          ...(instagram !== undefined && { instagram }),
+          ...(soundcloud !== undefined && { soundcloud }),
+        },
+      };
+    } else if (user.role === "venue") {
+      const { description, location, capacity, venueType, contactEmail } = req.body;
+      user.profile = {
+        ...user.profile?.toObject?.() || user.profile,
+        venue: {
+          ...(user.profile?.venue?.toObject?.() || user.profile?.venue || {}),
+          ...(description !== undefined && { description }),
+          ...(location !== undefined && { location }),
+          ...(capacity !== undefined && { capacity }),
+          ...(venueType !== undefined && { venueType }),
+          ...(contactEmail !== undefined && { contactEmail }),
+        },
+      };
+    }
+
+    user.markModified("profile");
+    await user.save();
+
+    res.status(200).json({
+      _id: user._id,
+      fullName: user.fullName,
+      email: user.email,
+      profilePic: user.profilePic,
+      role: user.role,
+      profile: user.profile,
+      following: user.following,
+      followers: user.followers,
+    });
+  } catch (error) {
+    console.log("Error in updateProfileData:", error.message);
+    res.status(500).json({ message: "Internal Server Error" });
+  }
+};
+
+/* =========================
    SEARCH USERS (for @ mentions)
 ========================= */
 export const searchUsers = async (req, res) => {

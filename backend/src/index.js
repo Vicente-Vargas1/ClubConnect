@@ -13,6 +13,7 @@ import postRoutes from "./routes/post.route.js";
 import followRoutes from "./routes/follow.route.js";
 import reviewRoutes from "./routes/review.route.js";
 import bookingRoutes from "./routes/booking.route.js";
+import notificationRoutes from "./routes/notification.route.js";
 import { app, server } from "./lib/socket.js";
 
 dotenv.config();
@@ -36,6 +37,7 @@ app.use("/api/posts", postRoutes);
 app.use("/api/follow", followRoutes);
 app.use("/api/reviews", reviewRoutes);
 app.use("/api/bookings", bookingRoutes);
+app.use("/api/notifications", notificationRoutes);
 
 // ✅ Production frontend serving
 if (process.env.NODE_ENV === "production") {

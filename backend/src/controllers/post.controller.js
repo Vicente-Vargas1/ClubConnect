@@ -1,5 +1,6 @@
 import Post from "../models/post.model.js";
 import User from "../models/user.model.js";
+import Notification from "../models/notification.model.js";
 import cloudinary from "../lib/cloudinary.js";
 
 // Get posts from followed users only
@@ -167,8 +168,16 @@ export const toggleInterested = async (req, res) => {
 
     await post.save();
 
-    // Emit socket event to venue owner
+    // Persist notification + emit socket event to venue owner
     if (!alreadyInterested) {
+      await Notification.create({
+        recipientId: post.userId,
+        senderId: req.user._id,
+        type: "dj_interested",
+        message: `${req.user.fullName} is interested in your DJ listing for ${post.lookingForDJ?.venueName || "your event"}`,
+        postId: post._id,
+      });
+
       const { getReceiverSocketId, io } = await import("../lib/socket.js");
       const venueSocketId = getReceiverSocketId(post.userId.toString());
       if (venueSocketId) {

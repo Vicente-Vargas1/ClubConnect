@@ -5,6 +5,7 @@ import {
   logout,
   signup,
   updateProfile,
+  updateProfileData,
   getUserById,
   searchUsers,
 } from "../controllers/auth.controller.js";
@@ -18,6 +19,7 @@ router.post("/login", login);
 router.post("/logout", logout);
 
 router.put("/update-profile", protectRoute, updateProfile);
+router.put("/update-profile-data", protectRoute, updateProfileData);
 
 router.get("/check", protectRoute, checkAuth);
 

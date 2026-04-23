@@ -1,5 +1,6 @@
 import Booking from "../models/booking.model.js";
 import Post from "../models/post.model.js";
+import Notification from "../models/notification.model.js";
 import { getReceiverSocketId, io } from "../lib/socket.js";
 
 export const createBooking = async (req, res) => {
@@ -18,6 +19,15 @@ export const createBooking = async (req, res) => {
       { path: "senderId", select: "fullName profilePic role" },
       { path: "receiverId", select: "fullName profilePic role" },
     ]);
+
+    // Persist notification
+    await Notification.create({
+      recipientId: receiverId,
+      senderId: senderId,
+      type: "booking_request",
+      message: `${booking.senderId.fullName} sent you a booking request for ${venueName}`,
+      bookingId: booking._id,
+    });
 
     // Notify the receiver in real-time
     const receiverSocketId = getReceiverSocketId(receiverId.toString());
@@ -82,6 +92,15 @@ export const acceptBooking = async (req, res) => {
       { path: "senderId", select: "fullName profilePic role" },
       { path: "receiverId", select: "fullName profilePic role" },
     ]);
+
+    // Persist notification
+    await Notification.create({
+      recipientId: booking.senderId._id,
+      senderId: booking.receiverId._id,
+      type: "booking_accepted",
+      message: `${booking.receiverId.fullName} accepted your booking request for ${booking.venueName}`,
+      bookingId: booking._id,
+    });
 
     // Notify sender that booking was accepted
     const senderSocketId = getReceiverSocketId(booking.senderId._id.toString());

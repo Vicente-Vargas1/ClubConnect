@@ -190,7 +190,7 @@ const SignUpPage = () => {
                   />
 
                   <input
-                    placeholder="Instagram"
+                    placeholder="https://instagram.com/yourprofile"
                     className="input input-bordered w-full"
                     onChange={(e) =>
                       setProfileData({
@@ -201,7 +201,7 @@ const SignUpPage = () => {
                   />
 
                   <input
-                    placeholder="SoundCloud"
+                    placeholder="https://soundcloud.com/yourprofile"
                     className="input input-bordered w-full"
                     onChange={(e) =>
                       setProfileData({

@@ -8,6 +8,7 @@ import PostCard from "../components/PostCard";
 import UpcomingEvents from "../components/UpcomingEvents";
 import LookingForDJSidebar from "../components/LookingForDJSidebar";
 import ChatSidebar from "../components/ChatSidebar";
+import UserSearchBar from "../components/UserSearchBar";
 import vinylImage from "../assets/vinyl.png";
 
 const SocialPage = () => {
@@ -29,7 +30,7 @@ const SocialPage = () => {
   };
 
   return (
-    <div className="min-h-screen bg-base-200 pt-20 pb-10">
+    <div className="min-h-screen bg-base-200 pt-20 pb-24 lg:pb-10">
       <div className="max-w-6xl mx-auto px-4">
         <div className="flex gap-6">
 
@@ -48,6 +49,8 @@ const SocialPage = () => {
           {/* CENTER COLUMN — Feed */}
           <main className="flex-1 min-w-0 max-w-xl mx-auto space-y-4">
             <h2 className="text-2xl font-bold text-center">Social Feed</h2>
+
+            <UserSearchBar />
 
             <CreatePost />
 

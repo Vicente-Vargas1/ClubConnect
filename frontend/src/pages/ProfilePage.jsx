@@ -6,10 +6,11 @@ import { useBookingStore } from "../store/useBookingStore";
 import { useReviewStore } from "../store/useReviewStore";
 import { useParams, Link } from "react-router-dom";
 import { axiosInstance } from "../lib/axios";
-import { Camera, Mail, User, Star, Calendar, Clock, MapPin, DollarSign, X, Instagram, Music2, Globe } from "lucide-react";
+import { Camera, Mail, User, Star, Calendar, Clock, MapPin, DollarSign, X, Instagram, Music2, Globe, Pencil } from "lucide-react";
 import { formatTimeTo12Hr } from "../lib/utils";
 import vinylImage from "../assets/vinyl.png";
 import PostCard from "../components/PostCard";
+import EditProfileModal from "../components/EditProfileModal";
 import toast from "react-hot-toast";
 
 const StarRating = ({ value, onChange, readonly = false }) => {
@@ -43,6 +44,7 @@ const ProfilePage = () => {
   const [selectedImg, setSelectedImg] = useState(null);
   const [viewUser, setViewUser] = useState(null);
   const [activeTab, setActiveTab] = useState("posts");
+  const [showEditModal, setShowEditModal] = useState(false);
 
   const isOwnProfile = !id;
   const user = isOwnProfile ? authUser : viewUser;
@@ -237,7 +239,7 @@ const ProfilePage = () => {
   if (!user) return null;
 
   return (
-    <div className="min-h-screen pt-20 pb-10">
+    <div className="min-h-screen pt-20 pb-24 lg:pb-10">
       <div className="max-w-2xl mx-auto p-4 py-8">
         <div className="bg-base-300 rounded-xl p-6 space-y-8">
 
@@ -308,13 +310,26 @@ const ProfilePage = () => {
                 >
                   {isFollowing ? "Unfollow" : "Follow"}
                 </button>
-                <button
-                  onClick={() => setShowBookingModal(true)}
-                  className="btn btn-sm btn-secondary"
-                >
-                  Book
-                </button>
+                {authUser?.role !== user?.role && (
+                  <button
+                    onClick={() => setShowBookingModal(true)}
+                    className="btn btn-sm btn-secondary"
+                  >
+                    Book
+                  </button>
+                )}
               </div>
+            )}
+
+            {/* Edit Profile button (own profile only) */}
+            {isOwnProfile && (
+              <button
+                onClick={() => setShowEditModal(true)}
+                className="btn btn-sm btn-ghost border gap-2"
+              >
+                <Pencil className="size-3.5" />
+                Edit Profile
+              </button>
             )}
           </div>
 
@@ -340,6 +355,9 @@ const ProfilePage = () => {
           {user.role === "dj" && user.profile?.dj && (
             <div className="bg-base-200 p-4 rounded-lg space-y-3">
               <h2 className="font-semibold">DJ Profile</h2>
+              {user.profile.dj.bio && (
+                <p className="text-sm text-base-content/80 leading-relaxed">{user.profile.dj.bio}</p>
+              )}
               {user.profile.dj.location && (
                 <div className="flex items-center gap-2 text-sm">
                   <MapPin className="size-4 text-base-content/50 flex-shrink-0" />
@@ -389,6 +407,9 @@ const ProfilePage = () => {
           {user.role === "venue" && user.profile?.venue && (
             <div className="bg-base-200 p-4 rounded-lg space-y-3">
               <h2 className="font-semibold">Venue Profile</h2>
+              {user.profile.venue.description && (
+                <p className="text-sm text-base-content/80 leading-relaxed">{user.profile.venue.description}</p>
+              )}
               {user.profile.venue.location && (
                 <div className="flex items-center gap-2 text-sm">
                   <MapPin className="size-4 text-base-content/50 flex-shrink-0" />
@@ -405,6 +426,17 @@ const ProfilePage = () => {
                 <div className="flex items-center gap-2 text-sm">
                   <Globe className="size-4 text-base-content/50 flex-shrink-0" />
                   <span>{user.profile.venue.venueType}</span>
+                </div>
+              )}
+              {user.profile.venue.contactEmail && (
+                <div className="flex items-center gap-2 text-sm">
+                  <Mail className="size-4 text-base-content/50 flex-shrink-0" />
+                  <a
+                    href={`mailto:${user.profile.venue.contactEmail}`}
+                    className="text-primary hover:underline"
+                  >
+                    {user.profile.venue.contactEmail}
+                  </a>
                 </div>
               )}
             </div>
@@ -713,6 +745,9 @@ const ProfilePage = () => {
           </div>
         </div>
       )}
+
+      {/* EDIT PROFILE MODAL */}
+      {showEditModal && <EditProfileModal onClose={() => setShowEditModal(false)} />}
 
       {/* POST PROMPT MODAL (after booking accepted) */}
       {showPostPrompt && (
