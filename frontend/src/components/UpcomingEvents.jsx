@@ -1,5 +1,6 @@
 import { useEffect } from "react";
 import { Calendar, Clock, MapPin } from "lucide-react";
+import { Link } from "react-router-dom";
 import { useBookingStore } from "../store/useBookingStore";
 import { formatTimeTo12Hr } from "../lib/utils";
 import vinylImage from "../assets/vinyl.png";
@@ -32,13 +33,13 @@ const UpcomingEvents = () => {
 
               return (
                 <li key={booking._id} className="px-4 py-3 space-y-1.5">
-                  <div className="flex items-center gap-2">
+                  <Link to={`/profile/${dj?._id}`} className="flex items-center gap-2 hover:opacity-80">
                     <img
                       src={dj?.profilePic || vinylImage}
                       className="size-7 rounded-full object-cover flex-shrink-0"
                     />
                     <span className="text-sm font-medium truncate">{dj?.fullName}</span>
-                  </div>
+                  </Link>
                   <div className="space-y-0.5 pl-1">
                     <div className="flex items-center gap-1.5 text-xs text-base-content/70">
                       <MapPin className="size-3 flex-shrink-0" />

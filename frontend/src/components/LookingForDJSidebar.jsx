@@ -113,7 +113,7 @@ const LookingForDJSidebar = () => {
                     {dj?.pay && (
                       <span className="flex items-center gap-1">
                         <DollarSign className="size-3" />
-                        {dj.pay}
+                        {String(dj.pay).replace(/^\$+/, "")}
                       </span>
                     )}
                     {dj?.genre && (

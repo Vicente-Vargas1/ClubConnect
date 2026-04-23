@@ -149,7 +149,7 @@ const PostCard = ({ post }) => {
             {djData?.pay && (
               <span className="flex items-center gap-1">
                 <DollarSign className="size-3.5" />
-                {djData.pay}
+                {String(djData.pay).replace(/^\$+/, "")}
               </span>
             )}
           </div>

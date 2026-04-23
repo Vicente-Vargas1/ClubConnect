@@ -210,13 +210,17 @@ const CreatePost = () => {
               <div className="grid grid-cols-2 gap-2">
                 <div>
                   <label className="text-xs text-base-content/60">Pay</label>
-                  <input
-                    type="text"
-                    placeholder="e.g. $500"
-                    className="input input-bordered input-sm w-full"
-                    value={djForm.pay}
-                    onChange={(e) => setDjForm({ ...djForm, pay: e.target.value })}
-                  />
+                  <label className="input input-bordered input-sm flex items-center gap-1 w-full">
+                    <span className="text-base-content/50 text-sm">$</span>
+                    <input
+                      type="number"
+                      min="0"
+                      placeholder="0"
+                      className="grow bg-transparent outline-none"
+                      value={djForm.pay}
+                      onChange={(e) => setDjForm({ ...djForm, pay: e.target.value })}
+                    />
+                  </label>
                 </div>
                 <div>
                   <label className="text-xs text-base-content/60">Genre / Style</label>
