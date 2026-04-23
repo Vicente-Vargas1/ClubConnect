@@ -34,6 +34,13 @@ export const useFollowStore = create((set, get) => ({
     try {
       const res = await axiosInstance.get(`/follow/${userId}/followers`);
       set({ followersList: res.data });
+      // Sync authUser count so the profile button matches the modal
+      const authUser = useAuthStore.getState().authUser;
+      if (authUser && (authUser._id === userId || authUser._id?.toString() === userId)) {
+        useAuthStore.setState({
+          authUser: { ...authUser, followers: res.data.map((u) => u._id) },
+        });
+      }
     } catch (error) {
       toast.error(error.response?.data?.message || "Failed to load followers");
     } finally {
@@ -46,6 +53,13 @@ export const useFollowStore = create((set, get) => ({
     try {
       const res = await axiosInstance.get(`/follow/${userId}/following`);
       set({ followingList: res.data });
+      // Sync authUser count so the profile button matches the modal
+      const authUser = useAuthStore.getState().authUser;
+      if (authUser && (authUser._id === userId || authUser._id?.toString() === userId)) {
+        useAuthStore.setState({
+          authUser: { ...authUser, following: res.data.map((u) => u._id) },
+        });
+      }
     } catch (error) {
       toast.error(error.response?.data?.message || "Failed to load following");
     } finally {

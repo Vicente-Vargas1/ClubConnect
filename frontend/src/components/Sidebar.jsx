@@ -68,7 +68,7 @@ const Sidebar = () => {
             </div>
 
             {/* User info - only visible on larger screens */}
-            <div className="hidden lg:flex flex-1 items-center justify-between min-w-0">
+            <div className="hidden lg:flex flex-1 items-center justify-between min-w-0 text-left">
               <div className="min-w-0">
                 <div className="font-medium truncate">{user.fullName}</div>
                 <div className="text-sm text-zinc-400">
