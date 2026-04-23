@@ -10,6 +10,7 @@ import {
   getLikedPosts,
   toggleInterested,
   getOpenDJPosts,
+  getPostsByUser,
 } from "../controllers/post.controller.js";
 
 const router = express.Router();
@@ -18,6 +19,7 @@ const router = express.Router();
 router.get("/following", protectRoute, getFollowingPosts);
 router.get("/liked", protectRoute, getLikedPosts);
 router.get("/open-dj", protectRoute, getOpenDJPosts);
+router.get("/user/:userId", protectRoute, getPostsByUser);
 router.get("/", protectRoute, getPosts);
 router.post("/", protectRoute, createPost);
 router.put("/:id/like", protectRoute, toggleLike);

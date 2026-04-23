@@ -69,6 +69,10 @@ const ProfilePage = () => {
   const [showPostPrompt, setShowPostPrompt] = useState(false);
   const [postPromptText, setPostPromptText] = useState("");
 
+  // User posts
+  const [userPosts, setUserPosts] = useState([]);
+  const [userPostsLoading, setUserPostsLoading] = useState(false);
+
   // Social store for liked posts
   const [likedPosts, setLikedPosts] = useState([]);
   const [likedLoading, setLikedLoading] = useState(false);
@@ -95,6 +99,22 @@ const ProfilePage = () => {
       fetchReviews(user._id);
     }
   }, [user?._id, fetchReviews]);
+
+  useEffect(() => {
+    if (!user?._id) return;
+    const fetchUserPosts = async () => {
+      setUserPostsLoading(true);
+      try {
+        const res = await axiosInstance.get(`/posts/user/${user._id}`);
+        setUserPosts(res.data);
+      } catch {
+        // silently fail
+      } finally {
+        setUserPostsLoading(false);
+      }
+    };
+    fetchUserPosts();
+  }, [user?._id]);
 
   useEffect(() => {
     if (isOwnProfile) {
@@ -369,11 +389,19 @@ const ProfilePage = () => {
             )}
           </div>
 
-          {/* POSTS TAB (placeholder — just links) */}
+          {/* POSTS TAB */}
           {activeTab === "posts" && (
-            <p className="text-sm text-base-content/60 text-center py-4">
-              Posts appear in the social feed.
-            </p>
+            <div className="space-y-4">
+              {userPostsLoading ? (
+                <div className="flex justify-center py-8">
+                  <span className="loading loading-spinner loading-md text-primary" />
+                </div>
+              ) : userPosts.length === 0 ? (
+                <p className="text-center text-base-content/50 text-sm py-8">No posts yet.</p>
+              ) : (
+                userPosts.map((post) => <PostCard key={post._id} post={post} />)
+              )}
+            </div>
           )}
 
           {/* LIKED POSTS TAB */}

@@ -208,6 +208,22 @@ export const getOpenDJPosts = async (req, res) => {
   }
 };
 
+// Get all posts by a specific user
+export const getPostsByUser = async (req, res) => {
+  try {
+    const posts = await Post.find({ userId: req.params.userId })
+      .sort({ createdAt: -1 })
+      .populate("userId", "fullName profilePic")
+      .populate("comments.userId", "fullName profilePic")
+      .populate("lookingForDJ.interestedUsers", "fullName profilePic role profile.dj.genres");
+
+    res.status(200).json(posts);
+  } catch (error) {
+    console.log("Error in getPostsByUser:", error.message);
+    res.status(500).json({ message: "Internal Server Error" });
+  }
+};
+
 // Delete a post (only by owner)
 export const deletePost = async (req, res) => {
   try {
