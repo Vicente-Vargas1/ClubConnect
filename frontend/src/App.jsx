@@ -19,6 +19,7 @@ import ExplorePage from "./pages/ExplorePage";
 import { useAuthStore } from "./store/useAuthStore";
 import { useThemeStore } from "./store/useThemeStore";
 import { useChatStore } from "./store/useChatStore";
+import { useBookingStore } from "./store/useBookingStore";
 
 const App = () => {
   const { authUser, checkAuth, isCheckingAuth } = useAuthStore();
@@ -64,6 +65,7 @@ const App = () => {
             `📅 New booking request from ${senderName} for ${booking.venueName}`,
             { duration: 5000 }
           );
+          useBookingStore.getState().fetchPendingCount();
         });
       }
     }

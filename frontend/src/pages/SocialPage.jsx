@@ -6,6 +6,7 @@ import { useAuthStore } from "../store/useAuthStore";
 import CreatePost from "../components/CreatePost";
 import PostCard from "../components/PostCard";
 import UpcomingEvents from "../components/UpcomingEvents";
+import LookingForDJSidebar from "../components/LookingForDJSidebar";
 import ChatSidebar from "../components/ChatSidebar";
 import vinylImage from "../assets/vinyl.png";
 
@@ -32,10 +33,15 @@ const SocialPage = () => {
       <div className="max-w-6xl mx-auto px-4">
         <div className="flex gap-6">
 
-          {/* LEFT COLUMN — Upcoming Events (lg+ only) */}
+          {/* LEFT COLUMN — Upcoming Events + DJ listings (lg+ only) */}
           <aside className="hidden lg:block w-64 flex-shrink-0">
-            <div className="sticky top-24">
-              <UpcomingEvents />
+            <div className="sticky top-24 flex flex-col gap-4 max-h-[calc(100vh-7rem)]">
+              <div className="flex-1 min-h-0 overflow-hidden">
+                <UpcomingEvents />
+              </div>
+              <div className="flex-1 min-h-0 overflow-hidden">
+                <LookingForDJSidebar />
+              </div>
             </div>
           </aside>
 

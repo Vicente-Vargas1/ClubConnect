@@ -19,6 +19,7 @@ const ChatPopup = () => {
     sendPopupMessage,
     unreadCounts,
   } = useChatStore();
+  const { clearPendingPopupMessage } = useChatStore();
   const { onlineUsers } = useAuthStore();
   const [messageText, setMessageText] = useState("");
   const messagesEndRef = useRef(null);
@@ -30,6 +31,14 @@ const ChatPopup = () => {
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [popupMessages]);
+
+  useEffect(() => {
+    const pending = useChatStore.getState().pendingPopupMessage;
+    if (popupSelectedUser && pending) {
+      setMessageText(pending);
+      clearPendingPopupMessage();
+    }
+  }, [popupSelectedUser, clearPendingPopupMessage]);
 
   const handleSend = async (e) => {
     e.preventDefault();
@@ -142,11 +151,11 @@ const ChatPopup = () => {
                     key={msg._id || i}
                     className={`flex ${isMine ? "justify-end" : "justify-start"}`}
                   >
-                    <div className="flex flex-col gap-0.5">
+                    <div className="flex flex-col gap-0.5 max-w-[75%]">
                       <div
-                        className={`max-w-[75%] rounded-xl px-3 py-2 text-sm break-words ${
+                        className={`w-fit rounded-xl px-3 py-2 text-sm break-words ${
                           isMine
-                            ? "bg-primary text-primary-content rounded-br-none"
+                            ? "bg-primary text-primary-content rounded-br-none ml-auto"
                             : "bg-base-200 rounded-bl-none"
                         }`}
                       >

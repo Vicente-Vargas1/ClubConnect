@@ -144,8 +144,7 @@ const CreatePost = () => {
                 <div>
                   <label className="text-xs text-base-content/60">Time</label>
                   <input
-                    type="text"
-                    placeholder="e.g. 9:00 PM"
+                    type="time"
                     className="input input-bordered input-sm w-full"
                     value={djForm.time}
                     onChange={(e) => setDjForm({ ...djForm, time: e.target.value })}

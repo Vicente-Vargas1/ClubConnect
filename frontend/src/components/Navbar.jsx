@@ -1,5 +1,7 @@
 import { Link } from "react-router-dom";
+import { useEffect } from "react";
 import { useAuthStore } from "../store/useAuthStore";
+import { useBookingStore } from "../store/useBookingStore";
 import {
   LogOut,
   MessageSquare,
@@ -12,6 +14,11 @@ import {
 
 const Navbar = () => {
   const { logout, authUser } = useAuthStore();
+  const { pendingCount, fetchPendingCount } = useBookingStore();
+
+  useEffect(() => {
+    if (authUser) fetchPendingCount();
+  }, [authUser, fetchPendingCount]);
 
   return (
     <header className="bg-base-100 border-b border-base-300 fixed w-full top-0 z-40 backdrop-blur-lg bg-base-100/80">
@@ -68,9 +75,14 @@ const Navbar = () => {
             {/* AUTHED ONLY */}
             {authUser && (
               <>
-                <Link to="/profile" className="btn btn-sm gap-2">
+                <Link to="/profile" className="btn btn-sm gap-2 relative">
                   <User className="size-5" />
                   <span className="hidden sm:inline">Profile</span>
+                  {pendingCount > 0 && (
+                    <span className="absolute -top-1 -right-1 size-5 rounded-full bg-error text-error-content text-xs font-bold flex items-center justify-center">
+                      {pendingCount > 9 ? "9+" : pendingCount}
+                    </span>
+                  )}
                 </Link>
 
                 <button

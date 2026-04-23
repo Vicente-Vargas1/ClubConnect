@@ -1,3 +1,14 @@
+export function formatTimeTo12Hr(timeStr) {
+  if (!timeStr) return "";
+  const match = timeStr.match(/^(\d{1,2}):(\d{2})$/);
+  if (!match) return timeStr;
+  let hours = parseInt(match[1], 10);
+  const minutes = match[2];
+  const ampm = hours >= 12 ? "PM" : "AM";
+  hours = hours % 12 || 12;
+  return `${hours}:${minutes} ${ampm}`;
+}
+
 export function formatMessageTime(date) {
   const now = new Date();
   const then = new Date(date);

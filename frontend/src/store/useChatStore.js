@@ -19,6 +19,7 @@ export const useChatStore = create((set, get) => ({
   popupSelectedUser: null,
   popupMessages: [],
   isPopupMessagesLoading: false,
+  pendingPopupMessage: null,
 
   // Unread tracking
   unreadCounts: {}, // { userId: number }
@@ -135,6 +136,8 @@ export const useChatStore = create((set, get) => ({
   },
 
   // Call once after socket connects — handles popup delivery + unread badges
+  clearPendingPopupMessage: () => set({ pendingPopupMessage: null }),
+
   subscribeToGlobalMessages: () => {
     const socket = useAuthStore.getState().socket;
 

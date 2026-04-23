@@ -9,6 +9,7 @@ import {
   getFollowingPosts,
   getLikedPosts,
   toggleInterested,
+  getOpenDJPosts,
 } from "../controllers/post.controller.js";
 
 const router = express.Router();
@@ -16,6 +17,7 @@ const router = express.Router();
 // Named routes must come before /:id wildcard routes
 router.get("/following", protectRoute, getFollowingPosts);
 router.get("/liked", protectRoute, getLikedPosts);
+router.get("/open-dj", protectRoute, getOpenDJPosts);
 router.get("/", protectRoute, getPosts);
 router.post("/", protectRoute, createPost);
 router.put("/:id/like", protectRoute, toggleLike);

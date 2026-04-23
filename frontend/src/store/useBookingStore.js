@@ -5,6 +5,7 @@ import toast from "react-hot-toast";
 export const useBookingStore = create((set, get) => ({
   bookings: [],
   upcomingBookings: [],
+  pendingCount: 0,
   isLoading: false,
 
   createBooking: async (data) => {
@@ -29,6 +30,15 @@ export const useBookingStore = create((set, get) => ({
       toast.error(error.response?.data?.message || "Failed to load bookings");
     } finally {
       set({ isLoading: false });
+    }
+  },
+
+  fetchPendingCount: async () => {
+    try {
+      const res = await axiosInstance.get("/bookings/pending-count");
+      set({ pendingCount: res.data.count });
+    } catch (error) {
+      console.error("Failed to fetch pending count");
     }
   },
 

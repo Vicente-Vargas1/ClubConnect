@@ -142,6 +142,19 @@ export const cancelBooking = async (req, res) => {
   }
 };
 
+export const getPendingCount = async (req, res) => {
+  try {
+    const count = await Booking.countDocuments({
+      receiverId: req.user._id,
+      status: "pending",
+    });
+    res.status(200).json({ count });
+  } catch (error) {
+    console.log("Error in getPendingCount:", error.message);
+    res.status(500).json({ message: "Internal Server Error" });
+  }
+};
+
 export const linkPost = async (req, res) => {
   try {
     const booking = await Booking.findById(req.params.id);

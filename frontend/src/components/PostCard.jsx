@@ -1,10 +1,11 @@
 import { useState } from "react";
 import { useAuthStore } from "../store/useAuthStore";
 import { useSocialStore } from "../store/useSocialStore";
+import { useChatStore } from "../store/useChatStore";
 import { axiosInstance } from "../lib/axios";
-import { Heart, MessageCircle, Trash2, Send, Calendar, Clock, MapPin, DollarSign, Music, Check } from "lucide-react";
+import { Heart, MessageCircle, Trash2, Send, Calendar, Clock, MapPin, DollarSign, Music, Check, X } from "lucide-react";
 import vinylImage from "../assets/vinyl.png";
-import { formatMessageTime } from "../lib/utils";
+import { formatMessageTime, formatTimeTo12Hr } from "../lib/utils";
 import { Link } from "react-router-dom";
 import toast from "react-hot-toast";
 
@@ -16,6 +17,7 @@ const PostCard = ({ post }) => {
   const [commentText, setCommentText] = useState("");
   const [interestedUsers, setInterestedUsers] = useState(post.lookingForDJ?.interestedUsers || []);
   const [interestLoading, setInterestLoading] = useState(false);
+  const [showInterestedModal, setShowInterestedModal] = useState(false);
 
   const fallbackAvatar = vinylImage;
 
@@ -37,6 +39,18 @@ const PostCard = ({ post }) => {
     if (!commentText.trim()) return;
     addComment(post._id, commentText.trim());
     setCommentText("");
+  };
+
+  const handleMessageDJ = (dj) => {
+    const { togglePopup, setPopupSelectedUser, isPopupOpen } = useChatStore.getState();
+    if (!isPopupOpen) togglePopup();
+    setPopupSelectedUser(dj);
+    useChatStore.setState({
+      pendingPopupMessage: `Hi ${dj.fullName}! This venue would like to book you for our event${
+        djData?.date ? ` on ${new Date(djData.date).toLocaleDateString()}` : ""
+      }${djData?.venueName ? ` at ${djData.venueName}` : ""}. Are you interested?`,
+    });
+    setShowInterestedModal(false);
   };
 
   const handleInterest = async () => {
@@ -117,7 +131,7 @@ const PostCard = ({ post }) => {
             {djData?.time && (
               <span className="flex items-center gap-1">
                 <Clock className="size-3.5" />
-                {djData.time}
+                {formatTimeTo12Hr(djData.time)}
               </span>
             )}
             {djData?.pay && (
@@ -156,10 +170,73 @@ const PostCard = ({ post }) => {
               {isInterested ? "Interested ✓" : "I'm Interested"}
             </button>
           )}
-          <span className="text-xs text-base-content/50 ml-auto">
-            {interestedUsers.length} DJ{interestedUsers.length !== 1 ? "s" : ""} interested
-          </span>
+          {isOwner && interestedUsers.length > 0 ? (
+            <button
+              onClick={() => setShowInterestedModal(true)}
+              className="text-xs text-primary hover:underline ml-auto"
+            >
+              {interestedUsers.length} DJ{interestedUsers.length !== 1 ? "s" : ""} interested →
+            </button>
+          ) : (
+            <span className="text-xs text-base-content/50 ml-auto">
+              {interestedUsers.length} DJ{interestedUsers.length !== 1 ? "s" : ""} interested
+            </span>
+          )}
         </div>
+
+        {showInterestedModal && (
+          <div
+            className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4"
+            onClick={() => setShowInterestedModal(false)}
+          >
+            <div
+              className="bg-base-100 rounded-xl p-5 w-full max-w-md max-h-[70vh] overflow-y-auto space-y-3"
+              onClick={(e) => e.stopPropagation()}
+            >
+              <div className="flex justify-between items-center">
+                <h3 className="font-bold text-lg">Interested DJs</h3>
+                <button
+                  onClick={() => setShowInterestedModal(false)}
+                  className="btn btn-ghost btn-sm btn-circle"
+                >
+                  <X className="size-4" />
+                </button>
+              </div>
+              {interestedUsers.map((dj) => (
+                <div key={dj._id || dj} className="flex items-center gap-3 p-3 bg-base-200 rounded-lg">
+                  <Link to={`/profile/${dj._id}`}>
+                    <img
+                      src={dj.profilePic || vinylImage}
+                      className="size-10 rounded-full object-cover cursor-pointer"
+                    />
+                  </Link>
+                  <div className="flex-1 min-w-0">
+                    <Link to={`/profile/${dj._id}`}>
+                      <p className="font-semibold text-sm hover:underline">{dj.fullName}</p>
+                    </Link>
+                    {dj.profile?.dj?.genres?.length > 0 && (
+                      <p className="text-xs text-base-content/60 truncate">
+                        {dj.profile.dj.genres.join(", ")}
+                      </p>
+                    )}
+                  </div>
+                  <button
+                    onClick={() => handleMessageDJ(dj)}
+                    className="btn btn-sm btn-primary gap-1"
+                  >
+                    <MessageCircle className="size-3.5" />
+                    Message
+                  </button>
+                </div>
+              ))}
+              {interestedUsers.length === 0 && (
+                <p className="text-center text-base-content/50 text-sm py-4">
+                  No DJs interested yet.
+                </p>
+              )}
+            </div>
+          </div>
+        )}
       </div>
     );
   }

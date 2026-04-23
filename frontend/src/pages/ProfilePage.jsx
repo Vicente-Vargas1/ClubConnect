@@ -7,6 +7,7 @@ import { useReviewStore } from "../store/useReviewStore";
 import { useParams } from "react-router-dom";
 import { axiosInstance } from "../lib/axios";
 import { Camera, Mail, User, Star, Calendar, Clock, MapPin, DollarSign, X } from "lucide-react";
+import { formatTimeTo12Hr } from "../lib/utils";
 import vinylImage from "../assets/vinyl.png";
 import PostCard from "../components/PostCard";
 import toast from "react-hot-toast";
@@ -56,7 +57,7 @@ const ProfilePage = () => {
   const [reviewText, setReviewText] = useState("");
 
   // Booking store
-  const { bookings, fetchMyBookings, acceptBooking, declineBooking, cancelBooking, createBooking } =
+  const { bookings, fetchMyBookings, acceptBooking, declineBooking, cancelBooking, createBooking, fetchPendingCount } =
     useBookingStore();
   const [showBookingModal, setShowBookingModal] = useState(false);
   const [bookingForm, setBookingForm] = useState({ date: "", time: "", venueName: "", pay: "" });
@@ -174,6 +175,7 @@ const ProfilePage = () => {
 
   const handleAccept = async (bookingId, booking) => {
     const accepted = await acceptBooking(bookingId);
+    fetchPendingCount();
     if (accepted) {
       const otherParty = accepted.senderId;
       const djName = accepted.senderId?.role === "dj" ? accepted.senderId?.fullName : accepted.receiverId?.fullName;
@@ -455,7 +457,7 @@ const ProfilePage = () => {
                         booking={b}
                         authUser={authUser}
                         onAccept={() => handleAccept(b._id, b)}
-                        onDecline={() => declineBooking(b._id)}
+                        onDecline={() => { declineBooking(b._id); fetchPendingCount(); }}
                       />
                     ))}
                   </div>
@@ -534,8 +536,7 @@ const ProfilePage = () => {
               <div>
                 <label className="label label-text text-sm">Time</label>
                 <input
-                  type="text"
-                  placeholder="e.g. 9:00 PM"
+                  type="time"
                   className="input input-bordered w-full"
                   value={bookingForm.time}
                   onChange={(e) => setBookingForm({ ...bookingForm, time: e.target.value })}
@@ -635,7 +636,7 @@ const BookingCard = ({ booking, authUser, onAccept, onDecline, onCancel }) => {
           <Calendar className="size-3.5" />
           <span>{new Date(booking.date).toLocaleDateString()}</span>
           <Clock className="size-3.5 ml-2" />
-          <span>{booking.time}</span>
+          <span>{formatTimeTo12Hr(booking.time)}</span>
         </div>
         <div className="flex items-center gap-2">
           <DollarSign className="size-3.5" />

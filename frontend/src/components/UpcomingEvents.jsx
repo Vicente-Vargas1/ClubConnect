@@ -1,6 +1,7 @@
 import { useEffect } from "react";
 import { Calendar, Clock, MapPin } from "lucide-react";
 import { useBookingStore } from "../store/useBookingStore";
+import { formatTimeTo12Hr } from "../lib/utils";
 import vinylImage from "../assets/vinyl.png";
 
 const UpcomingEvents = () => {
@@ -11,12 +12,12 @@ const UpcomingEvents = () => {
   }, [fetchUpcomingBookings]);
 
   return (
-    <div className="bg-base-100 rounded-xl border border-base-300 shadow overflow-hidden">
-      <div className="px-4 py-3 border-b border-base-300">
+    <div className="bg-base-100 rounded-xl border border-base-300 shadow overflow-hidden flex flex-col h-full">
+      <div className="px-4 py-3 border-b border-base-300 flex-shrink-0">
         <h3 className="font-semibold text-sm">Upcoming Events</h3>
       </div>
 
-      <div className="overflow-y-auto max-h-[calc(100vh-180px)]">
+      <div className="overflow-y-auto flex-1">
         {upcomingBookings.length === 0 ? (
           <p className="text-center text-base-content/50 text-xs py-8 px-4">
             No upcoming events yet.
@@ -54,7 +55,7 @@ const UpcomingEvents = () => {
                       {booking.time && (
                         <span className="flex items-center gap-1">
                           <Clock className="size-3" />
-                          {booking.time}
+                          {formatTimeTo12Hr(booking.time)}
                         </span>
                       )}
                     </div>

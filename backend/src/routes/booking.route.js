@@ -4,6 +4,7 @@ import {
   createBooking,
   getMyBookings,
   getUpcomingBookings,
+  getPendingCount,
   acceptBooking,
   declineBooking,
   cancelBooking,
@@ -14,6 +15,7 @@ const router = express.Router();
 
 router.get("/upcoming", protectRoute, getUpcomingBookings);
 router.get("/mine", protectRoute, getMyBookings);
+router.get("/pending-count", protectRoute, getPendingCount);
 router.post("/", protectRoute, createBooking);
 router.put("/:id/accept", protectRoute, acceptBooking);
 router.put("/:id/decline", protectRoute, declineBooking);

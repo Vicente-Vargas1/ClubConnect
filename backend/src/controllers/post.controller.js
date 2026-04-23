@@ -11,7 +11,8 @@ export const getFollowingPosts = async (req, res) => {
     const posts = await Post.find({ userId: { $in: following } })
       .sort({ createdAt: -1 })
       .populate("userId", "fullName profilePic")
-      .populate("comments.userId", "fullName profilePic");
+      .populate("comments.userId", "fullName profilePic")
+      .populate("lookingForDJ.interestedUsers", "fullName profilePic role profile.dj.genres");
 
     res.status(200).json(posts);
   } catch (error) {
@@ -27,7 +28,8 @@ export const getLikedPosts = async (req, res) => {
     const posts = await Post.find({ likes: userId })
       .sort({ createdAt: -1 })
       .populate("userId", "fullName profilePic")
-      .populate("comments.userId", "fullName profilePic");
+      .populate("comments.userId", "fullName profilePic")
+      .populate("lookingForDJ.interestedUsers", "fullName profilePic role profile.dj.genres");
 
     res.status(200).json(posts);
   } catch (error) {
@@ -42,7 +44,8 @@ export const getPosts = async (req, res) => {
     const posts = await Post.find()
       .sort({ createdAt: -1 })
       .populate("userId", "fullName profilePic")
-      .populate("comments.userId", "fullName profilePic");
+      .populate("comments.userId", "fullName profilePic")
+      .populate("lookingForDJ.interestedUsers", "fullName profilePic role profile.dj.genres");
 
     res.status(200).json(posts);
   } catch (error) {
@@ -182,6 +185,25 @@ export const toggleInterested = async (req, res) => {
     res.status(200).json({ interestedUsers: post.lookingForDJ.interestedUsers });
   } catch (error) {
     console.log("Error in toggleInterested:", error.message);
+    res.status(500).json({ message: "Internal Server Error" });
+  }
+};
+
+// Get open "Looking for DJ" posts (future, unfilled), sorted by soonest date
+export const getOpenDJPosts = async (req, res) => {
+  try {
+    const posts = await Post.find({
+      postType: "lookingForDJ",
+      "lookingForDJ.date": { $gte: new Date() },
+      "lookingForDJ.bookingId": null,
+    })
+      .sort({ "lookingForDJ.date": 1 })
+      .populate("userId", "fullName profilePic")
+      .populate("lookingForDJ.interestedUsers", "fullName profilePic");
+
+    res.status(200).json(posts);
+  } catch (error) {
+    console.log("Error in getOpenDJPosts:", error.message);
     res.status(500).json({ message: "Internal Server Error" });
   }
 };

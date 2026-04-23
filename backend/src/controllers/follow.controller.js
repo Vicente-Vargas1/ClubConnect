@@ -1,4 +1,8 @@
+import mongoose from "mongoose";
 import User from "../models/user.model.js";
+
+const sanitizeIds = (arr) =>
+  (arr || []).filter((id) => id != null && mongoose.Types.ObjectId.isValid(id));
 
 export const toggleFollow = async (req, res) => {
   try {
@@ -14,21 +18,30 @@ export const toggleFollow = async (req, res) => {
       User.findById(targetId),
     ]);
 
+    if (!currentUser) return res.status(404).json({ message: "Current user not found" });
     if (!targetUser) return res.status(404).json({ message: "User not found" });
+
+    currentUser.following = sanitizeIds(currentUser.following);
+    currentUser.followers = sanitizeIds(currentUser.followers);
+    targetUser.following = sanitizeIds(targetUser.following);
+    targetUser.followers = sanitizeIds(targetUser.followers);
 
     const isFollowing = currentUser.following.some((id) => id.equals(targetId));
 
     if (isFollowing) {
-      // Unfollow
       currentUser.following = currentUser.following.filter((id) => !id.equals(targetId));
       targetUser.followers = targetUser.followers.filter((id) => !id.equals(userId));
     } else {
-      // Follow
       currentUser.following.push(targetId);
       targetUser.followers.push(userId);
     }
 
-    await Promise.all([currentUser.save(), targetUser.save()]);
+    try {
+      await Promise.all([currentUser.save(), targetUser.save()]);
+    } catch (saveError) {
+      console.log("Error saving follow state for users:", userId, targetId, saveError.message);
+      return res.status(500).json({ message: "Failed to update follow state" });
+    }
 
     res.status(200).json({
       following: currentUser.following,
