@@ -469,7 +469,7 @@ const ProfilePage = () => {
                         booking={b}
                         authUser={authUser}
                         onAccept={() => handleAccept(b._id, b)}
-                        onDecline={() => declineBooking(b._id)
+                        onDecline={() => declineBooking(b._id)}
                       />
                     ))}
                   </div>
