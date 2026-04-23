@@ -12,11 +12,13 @@ import {
   Map,
 } from "lucide-react";
 import NotificationBell from "./NotificationBell";
+import { useChatStore } from "../store/useChatStore";
 
 const Navbar = () => {
   const { logout, authUser } = useAuthStore();
   const { pendingCount, fetchPendingCount } = useBookingStore();
   const { fetchUnreadCount } = useNotificationStore();
+  const { totalUnread: chatUnread } = useChatStore();
 
   useEffect(() => {
     if (authUser) {
@@ -58,6 +60,18 @@ const Navbar = () => {
               <Link to="/explore" className="btn btn-sm gap-2 transition-colors hidden sm:flex">
                 <Map className="w-4 h-4" />
                 <span className="hidden sm:inline">Explore</span>
+              </Link>
+            )}
+
+            {authUser && (
+              <Link to="/chat" className="btn btn-sm gap-2 transition-colors hidden sm:flex relative">
+                <MessageSquare className="w-4 h-4" />
+                <span className="hidden sm:inline">Chat</span>
+                {chatUnread > 0 && (
+                  <span className="absolute -top-1 -right-1 size-5 rounded-full bg-error text-error-content text-xs font-bold flex items-center justify-center">
+                    {chatUnread > 9 ? "9+" : chatUnread}
+                  </span>
+                )}
               </Link>
             )}
 

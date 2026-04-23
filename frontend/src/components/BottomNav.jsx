@@ -1,5 +1,6 @@
 import { Link, useLocation } from "react-router-dom";
 import { LayoutGrid, Map, MessageCircle, User } from "lucide-react";
+import { useChatStore } from "../store/useChatStore";
 
 const tabs = [
   { to: "/", icon: LayoutGrid, label: "Feed" },
@@ -10,6 +11,7 @@ const tabs = [
 
 const BottomNav = () => {
   const { pathname } = useLocation();
+  const { totalUnread: chatUnread } = useChatStore();
 
   const isActive = (to) => {
     if (to === "/") return pathname === "/";
@@ -23,13 +25,20 @@ const BottomNav = () => {
           <Link
             key={to}
             to={to}
-            className={`flex-1 flex flex-col items-center justify-center py-2 gap-0.5 transition-colors ${
+            className={`flex-1 flex flex-col items-center justify-center py-2 gap-0.5 transition-colors relative ${
               isActive(to)
                 ? "text-primary"
                 : "text-base-content/50 hover:text-base-content/80"
             }`}
           >
-            <Icon className="size-5" />
+            <div className="relative">
+              <Icon className="size-5" />
+              {to === "/chat" && chatUnread > 0 && (
+                <span className="absolute -top-1.5 -right-1.5 min-w-[1.1rem] h-[1.1rem] rounded-full bg-error text-error-content text-[10px] font-bold flex items-center justify-center px-0.5">
+                  {chatUnread > 9 ? "9+" : chatUnread}
+                </span>
+              )}
+            </div>
             <span className="text-[10px] font-medium">{label}</span>
           </Link>
         ))}
