@@ -1,5 +1,5 @@
 import { useRef, useState, useEffect, useCallback } from "react";
-import { Image, MapPin, X, Music } from "lucide-react";
+import { Image, MapPin, X, Music, Mic } from "lucide-react";
 import { MapContainer, TileLayer, Marker, useMapEvents } from "react-leaflet";
 import L from "leaflet";
 import "leaflet/dist/leaflet.css";
@@ -28,6 +28,9 @@ const CreatePost = () => {
 
   const [text, setText] = useState("");
   const [imagePreview, setImagePreview] = useState(null);
+  const [audioPreview, setAudioPreview] = useState(null);
+  const [audioFileName, setAudioFileName] = useState("");
+  const audioInputRef = useRef(null);
 
   // @ mention state
   const [mentionQuery, setMentionQuery] = useState("");
@@ -106,6 +109,25 @@ const CreatePost = () => {
     if (fileInputRef.current) fileInputRef.current.value = "";
   };
 
+  const handleAudioChange = (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+    if (file.size > 15 * 1024 * 1024) {
+      toast.error("Audio file must be under 15MB");
+      return;
+    }
+    setAudioFileName(file.name);
+    const reader = new FileReader();
+    reader.onloadend = () => setAudioPreview(reader.result);
+    reader.readAsDataURL(file);
+  };
+
+  const removeAudio = () => {
+    setAudioPreview(null);
+    setAudioFileName("");
+    if (audioInputRef.current) audioInputRef.current.value = "";
+  };
+
   const removeLocation = () => {
     setShowLocationPicker(false);
     setLocationName("");
@@ -123,6 +145,7 @@ const CreatePost = () => {
       await createPost({
         text: text.trim(),
         image: imagePreview,
+        audio: audioPreview,
         location: pickedLatLng && locationName.trim()
           ? { name: locationName.trim(), lat: pickedLatLng.lat, lng: pickedLatLng.lng }
           : undefined,
@@ -130,23 +153,26 @@ const CreatePost = () => {
         lookingForDJ: djForm,
       });
     } else {
-      if (!text.trim() && !imagePreview) {
-        toast.error("Add some text or an image");
+      if (!text.trim() && !imagePreview && !audioPreview) {
+        toast.error("Add some text, an image, or audio");
         return;
       }
       const location =
         pickedLatLng && locationName.trim()
           ? { name: locationName.trim(), lat: pickedLatLng.lat, lng: pickedLatLng.lng }
           : undefined;
-      await createPost({ text: text.trim(), image: imagePreview, location });
+      await createPost({ text: text.trim(), image: imagePreview, audio: audioPreview, location });
     }
 
     setText("");
     setImagePreview(null);
+    setAudioPreview(null);
+    setAudioFileName("");
     removeLocation();
     setIsLookingForDJ(false);
     setDjForm({ date: "", time: "", venueName: "", pay: "", genre: "", eventDescription: "" });
     if (fileInputRef.current) fileInputRef.current.value = "";
+    if (audioInputRef.current) audioInputRef.current.value = "";
   };
 
   return (
@@ -291,6 +317,17 @@ const CreatePost = () => {
             </div>
           )}
 
+          {/* Audio preview */}
+          {audioPreview && (
+            <div className="flex items-center gap-2 bg-base-200 rounded-lg px-3 py-2">
+              <Mic className="size-4 text-primary flex-shrink-0" />
+              <audio controls src={audioPreview} className="flex-1 h-8" />
+              <button type="button" onClick={removeAudio} className="btn btn-ghost btn-xs btn-circle">
+                <X className="size-3" />
+              </button>
+            </div>
+          )}
+
           {/* Location picker */}
           {showLocationPicker && (
             <div className="space-y-2 border border-base-300 rounded-lg p-3">
@@ -360,6 +397,23 @@ const CreatePost = () => {
                   <span className="text-xs">Location</span>
                 </button>
               )}
+              {!audioPreview && (
+                <button
+                  type="button"
+                  onClick={() => audioInputRef.current?.click()}
+                  className="btn btn-ghost btn-sm gap-1.5 text-base-content/60"
+                >
+                  <Mic className="size-4" />
+                  <span className="text-xs">Audio</span>
+                </button>
+              )}
+              <input
+                type="file"
+                accept="audio/*"
+                ref={audioInputRef}
+                onChange={handleAudioChange}
+                className="hidden"
+              />
             </div>
             <button
               type="submit"

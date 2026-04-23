@@ -33,10 +33,10 @@ export const useSocialStore = create((set, get) => ({
     }
   },
 
-  createPost: async ({ text, image, location, postType, lookingForDJ }) => {
+  createPost: async ({ text, image, audio, location, postType, lookingForDJ }) => {
     set({ isCreatingPost: true });
     try {
-      const res = await axiosInstance.post("/posts", { text, image, location, postType, lookingForDJ });
+      const res = await axiosInstance.post("/posts", { text, image, audio, location, postType, lookingForDJ });
       set({ posts: [res.data, ...get().posts] });
       toast.success("Post created!");
       return res.data;

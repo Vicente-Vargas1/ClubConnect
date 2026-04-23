@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from "react";
-import { Bell, Calendar, CheckCheck, Music, X } from "lucide-react";
+import { Bell, Calendar, CheckCheck, Music, X, Users, Star, XCircle, Ban } from "lucide-react";
 import { useNotificationStore } from "../store/useNotificationStore";
 import { useNavigate } from "react-router-dom";
 import vinylImage from "../assets/vinyl.png";
@@ -7,7 +7,11 @@ import vinylImage from "../assets/vinyl.png";
 const typeIcon = {
   booking_request: <Calendar className="size-4 text-warning" />,
   booking_accepted: <Calendar className="size-4 text-success" />,
+  booking_declined: <XCircle className="size-4 text-error" />,
+  booking_cancelled: <Ban className="size-4 text-base-content/50" />,
   dj_interested: <Music className="size-4 text-secondary" />,
+  new_follower: <Users className="size-4 text-primary" />,
+  new_review: <Star className="size-4 text-yellow-400" />,
 };
 
 const timeAgo = (date) => {
@@ -42,10 +46,14 @@ const NotificationBell = () => {
 
   const handleNotificationClick = (n) => {
     setIsOpen(false);
-    if (n.type === "booking_request" || n.type === "booking_accepted") {
+    if (["booking_request", "booking_accepted", "booking_declined", "booking_cancelled"].includes(n.type)) {
       navigate("/profile");
-    } else if (n.type === "dj_interested" && n.postId) {
+    } else if (n.type === "dj_interested") {
       navigate("/");
+    } else if (n.type === "new_follower") {
+      navigate(`/profile/${n.senderId?._id}`);
+    } else if (n.type === "new_review") {
+      navigate("/profile");
     }
   };
 

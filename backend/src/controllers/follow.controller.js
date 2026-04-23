@@ -1,5 +1,7 @@
 import mongoose from "mongoose";
 import User from "../models/user.model.js";
+import Notification from "../models/notification.model.js";
+import { getReceiverSocketId, io } from "../lib/socket.js";
 
 const sanitizeIds = (arr) =>
   (arr || []).filter((id) => id != null && mongoose.Types.ObjectId.isValid(id));
@@ -34,6 +36,18 @@ export const toggleFollow = async (req, res) => {
     } else {
       currentUser.following.push(targetId);
       targetUser.followers.push(userId);
+
+      await Notification.create({
+        recipientId: targetId,
+        senderId: userId,
+        type: "new_follower",
+        message: `${currentUser.fullName} started following you`,
+      });
+
+      const targetSocketId = getReceiverSocketId(targetId.toString());
+      if (targetSocketId) {
+        io.to(targetSocketId).emit("newFollower", { senderId: userId.toString() });
+      }
     }
 
     try {

@@ -43,6 +43,8 @@ const userSchema = new mongoose.Schema(
         instagram: String,
         youtube: String,
         soundcloud: String,
+        availableForBookings: { type: Boolean, default: false },
+        audioPreview: { type: String, default: "" },
       },
 
       venue: {

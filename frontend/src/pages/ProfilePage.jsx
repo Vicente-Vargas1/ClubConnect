@@ -354,7 +354,21 @@ const ProfilePage = () => {
           {/* DJ PROFILE */}
           {user.role === "dj" && user.profile?.dj && (
             <div className="bg-base-200 p-4 rounded-lg space-y-3">
-              <h2 className="font-semibold">DJ Profile</h2>
+              <div className="flex items-center justify-between">
+                <h2 className="font-semibold">DJ Profile</h2>
+                {user.profile.dj.availableForBookings && (
+                  <span className="badge badge-success badge-sm gap-1">
+                    <span className="size-1.5 rounded-full bg-success-content" />
+                    Available for bookings
+                  </span>
+                )}
+              </div>
+              {user.profile.dj.audioPreview && (
+                <div>
+                  <p className="text-xs text-base-content/50 mb-1">Set Preview</p>
+                  <audio controls src={user.profile.dj.audioPreview} className="w-full h-10" />
+                </div>
+              )}
               {user.profile.dj.bio && (
                 <p className="text-sm text-base-content/80 leading-relaxed">{user.profile.dj.bio}</p>
               )}

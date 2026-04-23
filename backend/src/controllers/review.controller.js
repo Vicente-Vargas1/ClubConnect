@@ -1,4 +1,5 @@
 import Review from "../models/review.model.js";
+import Notification from "../models/notification.model.js";
 
 export const getReviews = async (req, res) => {
   try {
@@ -40,6 +41,13 @@ export const submitReview = async (req, res) => {
     );
 
     await review.populate("reviewerId", "fullName profilePic");
+
+    await Notification.create({
+      recipientId: reviewedUserId,
+      senderId: reviewerId,
+      type: "new_review",
+      message: `${req.user.fullName} left you a ${rating}-star review`,
+    });
 
     res.status(200).json(review);
   } catch (error) {

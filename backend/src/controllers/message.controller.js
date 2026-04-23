@@ -68,6 +68,8 @@ export const getRecentContacts = async (req, res) => {
                 ? lastMsg.text.substring(0, 40) + (lastMsg.text.length > 40 ? "…" : "")
                 : lastMsg.image
                 ? "📷 Image"
+                : lastMsg.audio
+                ? "🎵 Audio clip"
                 : "",
               createdAt: lastMsg.createdAt,
             }
@@ -94,6 +96,18 @@ export const getMessages = async (req, res) => {
       ],
     });
 
+    // Mark all messages sent by the other user to me as read
+    await Message.updateMany(
+      { senderId: userToChatId, receiverId: myId, read: false },
+      { read: true }
+    );
+
+    // Tell the sender their messages were read
+    const senderSocketId = getReceiverSocketId(userToChatId.toString());
+    if (senderSocketId) {
+      io.to(senderSocketId).emit("messagesRead", { by: myId.toString() });
+    }
+
     res.status(200).json(messages);
   } catch (error) {
     console.log("Error in getMessages controller: ", error.message);
@@ -103,15 +117,20 @@ export const getMessages = async (req, res) => {
 
 export const sendMessage = async (req, res) => {
   try {
-    const { text, image } = req.body;
+    const { text, image, audio } = req.body;
     const { id: receiverId } = req.params;
     const senderId = req.user._id;
 
     let imageUrl;
     if (image) {
-      // Upload base64 image to cloudinary
       const uploadResponse = await cloudinary.uploader.upload(image);
       imageUrl = uploadResponse.secure_url;
+    }
+
+    let audioUrl;
+    if (audio) {
+      const uploadResponse = await cloudinary.uploader.upload(audio, { resource_type: "auto" });
+      audioUrl = uploadResponse.secure_url;
     }
 
     const newMessage = new Message({
@@ -119,6 +138,7 @@ export const sendMessage = async (req, res) => {
       receiverId,
       text,
       image: imageUrl,
+      audio: audioUrl,
     });
 
     await newMessage.save();

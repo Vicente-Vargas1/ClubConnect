@@ -58,7 +58,7 @@ export const getPosts = async (req, res) => {
 // Create a new post
 export const createPost = async (req, res) => {
   try {
-    const { text, image, location, postType, lookingForDJ } = req.body;
+    const { text, image, audio, location, postType, lookingForDJ } = req.body;
     const userId = req.user._id;
 
     if (postType === "lookingForDJ") {
@@ -68,8 +68,8 @@ export const createPost = async (req, res) => {
       if (!lookingForDJ?.date || !lookingForDJ?.venueName) {
         return res.status(400).json({ message: "Date and venue name are required for Looking for DJ posts" });
       }
-    } else if (!text && !image) {
-      return res.status(400).json({ message: "Post must have text or an image" });
+    } else if (!text && !image && !audio) {
+      return res.status(400).json({ message: "Post must have text, an image, or audio" });
     }
 
     let imageUrl = "";
@@ -78,10 +78,17 @@ export const createPost = async (req, res) => {
       imageUrl = uploadRes.secure_url;
     }
 
+    let audioUrl = "";
+    if (audio) {
+      const uploadRes = await cloudinary.uploader.upload(audio, { resource_type: "auto" });
+      audioUrl = uploadRes.secure_url;
+    }
+
     const post = new Post({
       userId,
       text,
       image: imageUrl,
+      audio: audioUrl,
       location: location || {},
       postType: postType || "regular",
       lookingForDJ: postType === "lookingForDJ" ? { ...lookingForDJ, interestedUsers: [] } : undefined,

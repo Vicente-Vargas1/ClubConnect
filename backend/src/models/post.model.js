@@ -30,6 +30,10 @@ const postSchema = new mongoose.Schema(
       type: String,
       default: "",
     },
+    audio: {
+      type: String,
+      default: "",
+    },
     likes: [
       {
         type: mongoose.Schema.Types.ObjectId,

@@ -88,6 +88,26 @@ const App = () => {
           useBookingStore.getState().fetchPendingCount();
           incrementUnread();
         });
+
+        socket.on("bookingDeclined", (booking) => {
+          toast.error(
+            `Your booking request for ${booking.venueName} was declined`,
+            { duration: 5000 }
+          );
+          incrementUnread();
+        });
+
+        socket.on("bookingCancelled", (booking) => {
+          toast(
+            `Booking for ${booking.venueName} was cancelled`,
+            { duration: 5000 }
+          );
+          incrementUnread();
+        });
+
+        socket.on("newFollower", () => {
+          incrementUnread();
+        });
       }
     }
   }, [authUser, subscribeToGlobalMessages, incrementUnread]);

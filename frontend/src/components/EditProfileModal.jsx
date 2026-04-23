@@ -1,5 +1,5 @@
-import { useState } from "react";
-import { X, Loader2 } from "lucide-react";
+import { useState, useRef } from "react";
+import { X, Loader2, Music } from "lucide-react";
 import { useAuthStore } from "../store/useAuthStore";
 import toast from "react-hot-toast";
 
@@ -8,6 +8,7 @@ const EditProfileModal = ({ onClose }) => {
   const isDJ = authUser?.role === "dj";
   const djProfile = authUser?.profile?.dj || {};
   const venueProfile = authUser?.profile?.venue || {};
+  const audioInputRef = useRef(null);
 
   const [form, setForm] = useState(
     isDJ
@@ -17,6 +18,8 @@ const EditProfileModal = ({ onClose }) => {
           genres: djProfile.genres?.join(", ") || "",
           instagram: djProfile.instagram || "",
           soundcloud: djProfile.soundcloud || "",
+          availableForBookings: djProfile.availableForBookings || false,
+          audioPreview: "",
         }
       : {
           description: venueProfile.description || "",
@@ -26,8 +29,22 @@ const EditProfileModal = ({ onClose }) => {
           contactEmail: venueProfile.contactEmail || "",
         }
   );
+  const [audioFileName, setAudioFileName] = useState("");
 
   const set = (field, value) => setForm((f) => ({ ...f, [field]: value }));
+
+  const handleAudioChange = (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+    if (file.size > 15 * 1024 * 1024) {
+      toast.error("Audio file must be under 15MB");
+      return;
+    }
+    setAudioFileName(file.name);
+    const reader = new FileReader();
+    reader.onloadend = () => set("audioPreview", reader.result);
+    reader.readAsDataURL(file);
+  };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -115,6 +132,44 @@ const EditProfileModal = ({ onClose }) => {
                   value={form.soundcloud}
                   onChange={(e) => set("soundcloud", e.target.value)}
                 />
+              </div>
+              <div className="flex items-center justify-between bg-base-200 rounded-lg px-4 py-3">
+                <div>
+                  <p className="text-sm font-medium">Available for bookings</p>
+                  <p className="text-xs text-base-content/50">Show venues you're open to new gigs</p>
+                </div>
+                <input
+                  type="checkbox"
+                  className="toggle toggle-success toggle-sm"
+                  checked={form.availableForBookings}
+                  onChange={(e) => set("availableForBookings", e.target.checked)}
+                />
+              </div>
+              <div>
+                <label className="label label-text text-sm font-medium">Set Preview (audio)</label>
+                <button
+                  type="button"
+                  onClick={() => audioInputRef.current?.click()}
+                  className="btn btn-ghost btn-sm border w-full gap-2 justify-start"
+                >
+                  <Music className="size-4" />
+                  {audioFileName ? audioFileName : (djProfile.audioPreview ? "Replace current preview" : "Upload MP3 or WAV (max 15MB)")}
+                </button>
+                <input
+                  type="file"
+                  accept="audio/*"
+                  ref={audioInputRef}
+                  onChange={handleAudioChange}
+                  className="hidden"
+                />
+                {djProfile.audioPreview && !audioFileName && (
+                  <div className="mt-2">
+                    <audio controls src={djProfile.audioPreview} className="w-full h-9" />
+                  </div>
+                )}
+                {audioFileName && (
+                  <p className="text-xs text-success mt-1">New file selected — will upload on save</p>
+                )}
               </div>
             </>
           ) : (

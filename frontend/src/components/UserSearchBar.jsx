@@ -104,7 +104,12 @@ const UserSearchBar = () => {
                     />
                     <div className="flex-1 min-w-0">
                       <p className="font-semibold text-sm truncate">{user.fullName}</p>
-                      <p className="text-xs text-base-content/50 capitalize">{user.role}</p>
+                      <div className="flex items-center gap-1.5">
+                        <p className="text-xs text-base-content/50 capitalize">{user.role}</p>
+                        {user.role === "dj" && user.profile?.dj?.availableForBookings && (
+                          <span className="text-[10px] bg-success/20 text-success font-medium px-1.5 py-0.5 rounded-full">Available</span>
+                        )}
+                      </div>
                     </div>
                   </button>
                 </li>

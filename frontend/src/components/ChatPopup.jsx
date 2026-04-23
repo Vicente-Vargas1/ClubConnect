@@ -1,9 +1,10 @@
 import { useEffect, useRef, useState } from "react";
-import { ArrowLeft, Loader, Send, X } from "lucide-react";
+import { ArrowLeft, Loader, Mic, Send, X } from "lucide-react";
 import { useChatStore } from "../store/useChatStore";
 import { useAuthStore } from "../store/useAuthStore";
 import { formatMessageTime } from "../lib/utils";
 import vinylImage from "../assets/vinyl.png";
+import toast from "react-hot-toast";
 
 const ChatPopup = () => {
   const {
@@ -18,11 +19,16 @@ const ChatPopup = () => {
     isPopupMessagesLoading,
     sendPopupMessage,
     unreadCounts,
+    typingUsers,
+    sendTyping,
+    stopTyping,
   } = useChatStore();
   const { clearPendingPopupMessage } = useChatStore();
-  const { onlineUsers } = useAuthStore();
+  const { onlineUsers, authUser } = useAuthStore();
   const [messageText, setMessageText] = useState("");
   const messagesEndRef = useRef(null);
+  const audioInputRef = useRef(null);
+  const typingTimerRef = useRef(null);
 
   useEffect(() => {
     if (isPopupOpen && users.length === 0) getUsers();
@@ -30,7 +36,7 @@ const ChatPopup = () => {
 
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
-  }, [popupMessages]);
+  }, [popupMessages, typingUsers]);
 
   useEffect(() => {
     const pending = useChatStore.getState().pendingPopupMessage;
@@ -40,12 +46,42 @@ const ChatPopup = () => {
     }
   }, [popupSelectedUser, clearPendingPopupMessage]);
 
+  const handleTextChange = (e) => {
+    setMessageText(e.target.value);
+    if (!popupSelectedUser) return;
+    const toId = popupSelectedUser._id;
+    sendTyping(toId);
+    clearTimeout(typingTimerRef.current);
+    typingTimerRef.current = setTimeout(() => stopTyping(toId), 1500);
+  };
+
   const handleSend = async (e) => {
     e.preventDefault();
     if (!messageText.trim()) return;
+    if (popupSelectedUser) {
+      stopTyping(popupSelectedUser._id);
+      clearTimeout(typingTimerRef.current);
+    }
     await sendPopupMessage({ text: messageText.trim() });
     setMessageText("");
   };
+
+  const handleAudioSend = (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+    if (file.size > 10 * 1024 * 1024) {
+      toast.error("Audio file must be under 10MB");
+      return;
+    }
+    const reader = new FileReader();
+    reader.onloadend = async () => {
+      await sendPopupMessage({ audio: reader.result });
+    };
+    reader.readAsDataURL(file);
+    e.target.value = "";
+  };
+
+  const isTyping = popupSelectedUser && typingUsers[popupSelectedUser._id];
 
   return (
     <div
@@ -77,12 +113,16 @@ const ChatPopup = () => {
               alt=""
               className="size-7 rounded-full object-cover flex-shrink-0"
             />
-            <span className="font-semibold text-sm truncate">
-              {popupSelectedUser.fullName}
-            </span>
-            {onlineUsers.includes(popupSelectedUser._id) && (
-              <span className="size-2 rounded-full bg-green-500 flex-shrink-0" />
-            )}
+            <div className="min-w-0">
+              <span className="font-semibold text-sm truncate block">
+                {popupSelectedUser.fullName}
+              </span>
+              {isTyping ? (
+                <span className="text-[10px] text-primary">typing…</span>
+              ) : onlineUsers.includes(popupSelectedUser._id) ? (
+                <span className="text-[10px] text-success">Online</span>
+              ) : null}
+            </div>
           </div>
         ) : (
           <span className="font-semibold text-sm">Messages</span>
@@ -143,40 +183,62 @@ const ChatPopup = () => {
                 <Loader className="size-5 animate-spin text-primary" />
               </div>
             ) : (
-              popupMessages.map((msg, i) => {
-                const isMine =
-                  msg.senderId === useAuthStore.getState().authUser?._id;
-                return (
-                  <div
-                    key={msg._id || i}
-                    className={`flex ${isMine ? "justify-end" : "justify-start"}`}
-                  >
-                    <div className="flex flex-col gap-0.5 max-w-[75%]">
-                      <div
-                        className={`w-fit rounded-xl px-3 py-2 text-sm break-words ${
-                          isMine
-                            ? "bg-primary text-primary-content rounded-br-none ml-auto"
-                            : "bg-base-200 rounded-bl-none"
-                        }`}
-                      >
-                        {msg.image && (
-                          <img
-                            src={msg.image}
-                            alt=""
-                            className="rounded-lg mb-1 max-w-full"
-                          />
-                        )}
-                        {msg.text}
+              <>
+                {popupMessages.map((msg, i) => {
+                  const isMine = msg.senderId === authUser?._id;
+                  return (
+                    <div
+                      key={msg._id || i}
+                      className={`flex ${isMine ? "justify-end" : "justify-start"}`}
+                    >
+                      <div className="flex flex-col gap-0.5 max-w-[75%]">
+                        <div
+                          className={`w-fit rounded-xl px-3 py-2 text-sm break-words ${
+                            isMine
+                              ? "bg-primary text-primary-content rounded-br-none ml-auto"
+                              : "bg-base-200 rounded-bl-none"
+                          }`}
+                        >
+                          {msg.image && (
+                            <img
+                              src={msg.image}
+                              alt=""
+                              className="rounded-lg mb-1 max-w-full"
+                            />
+                          )}
+                          {msg.audio && (
+                            <audio controls src={msg.audio} className="w-40 h-8" />
+                          )}
+                          {msg.text}
+                        </div>
+                        <div className={`flex items-center gap-1 ${isMine ? "justify-end" : "justify-start"}`}>
+                          {msg.createdAt && (
+                            <span className="text-[10px] text-base-content/40">
+                              {formatMessageTime(msg.createdAt)}
+                            </span>
+                          )}
+                          {isMine && (
+                            <span className={`text-[10px] ${msg.read ? "text-primary" : "text-base-content/30"}`}>
+                              {msg.read ? "✓✓" : "✓"}
+                            </span>
+                          )}
+                        </div>
                       </div>
-                      {msg.createdAt && (
-                        <span className={`text-[10px] text-base-content/40 ${isMine ? "text-right" : "text-left"}`}>
-                          {formatMessageTime(msg.createdAt)}
-                        </span>
-                      )}
+                    </div>
+                  );
+                })}
+
+                {/* Typing indicator */}
+                {isTyping && (
+                  <div className="flex justify-start">
+                    <div className="bg-base-200 rounded-xl rounded-bl-none px-3 py-2 flex items-center gap-1">
+                      <span className="size-1.5 rounded-full bg-base-content/40 animate-bounce" style={{ animationDelay: "0ms" }} />
+                      <span className="size-1.5 rounded-full bg-base-content/40 animate-bounce" style={{ animationDelay: "150ms" }} />
+                      <span className="size-1.5 rounded-full bg-base-content/40 animate-bounce" style={{ animationDelay: "300ms" }} />
                     </div>
                   </div>
-                );
-              })
+                )}
+              </>
             )}
             <div ref={messagesEndRef} />
           </div>
@@ -189,9 +251,24 @@ const ChatPopup = () => {
           onSubmit={handleSend}
           className="flex items-center gap-2 px-3 py-2 border-t border-base-300 flex-shrink-0"
         >
+          <button
+            type="button"
+            onClick={() => audioInputRef.current?.click()}
+            className="btn btn-ghost btn-xs btn-circle flex-shrink-0"
+            title="Send audio clip"
+          >
+            <Mic className="size-4" />
+          </button>
+          <input
+            type="file"
+            accept="audio/*"
+            ref={audioInputRef}
+            onChange={handleAudioSend}
+            className="hidden"
+          />
           <input
             value={messageText}
-            onChange={(e) => setMessageText(e.target.value)}
+            onChange={handleTextChange}
             placeholder="Message…"
             className="input input-sm input-bordered flex-1"
           />

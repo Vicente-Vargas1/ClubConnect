@@ -169,6 +169,12 @@ const PostCard = ({ post }) => {
           <img src={post.image} className="w-full max-h-[480px] object-cover" />
         )}
 
+        {post.audio && (
+          <div className="px-4 pb-2">
+            <audio controls src={post.audio} className="w-full h-10" />
+          </div>
+        )}
+
         {/* Actions */}
         <div className="flex items-center gap-4 px-4 py-3 border-t border-base-200">
           {authUser.role === "dj" && !isExpired && !isFilled && (
@@ -325,6 +331,13 @@ const PostCard = ({ post }) => {
           src={post.image}
           className="w-full max-h-[480px] object-cover"
         />
+      )}
+
+      {/* AUDIO */}
+      {post.audio && (
+        <div className="px-4 pb-2">
+          <audio controls src={post.audio} className="w-full h-10" />
+        </div>
       )}
 
       {/* ACTIONS */}

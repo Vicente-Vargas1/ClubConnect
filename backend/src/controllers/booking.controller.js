@@ -127,6 +127,24 @@ export const declineBooking = async (req, res) => {
     booking.status = "declined";
     await booking.save();
 
+    await booking.populate([
+      { path: "senderId", select: "fullName profilePic role" },
+      { path: "receiverId", select: "fullName profilePic role" },
+    ]);
+
+    await Notification.create({
+      recipientId: booking.senderId._id,
+      senderId: booking.receiverId._id,
+      type: "booking_declined",
+      message: `${booking.receiverId.fullName} declined your booking request for ${booking.venueName}`,
+      bookingId: booking._id,
+    });
+
+    const senderSocketId = getReceiverSocketId(booking.senderId._id.toString());
+    if (senderSocketId) {
+      io.to(senderSocketId).emit("bookingDeclined", booking);
+    }
+
     res.status(200).json(booking);
   } catch (error) {
     console.log("Error in declineBooking:", error.message);
@@ -153,6 +171,25 @@ export const cancelBooking = async (req, res) => {
     }
 
     await booking.save();
+
+    await booking.populate([
+      { path: "senderId", select: "fullName profilePic role" },
+      { path: "receiverId", select: "fullName profilePic role" },
+    ]);
+
+    const notifyId = booking.senderId._id.equals(userId) ? booking.receiverId._id : booking.senderId._id;
+    await Notification.create({
+      recipientId: notifyId,
+      senderId: userId,
+      type: "booking_cancelled",
+      message: `${req.user.fullName} cancelled the booking for ${booking.venueName}`,
+      bookingId: booking._id,
+    });
+
+    const notifySocketId = getReceiverSocketId(notifyId.toString());
+    if (notifySocketId) {
+      io.to(notifySocketId).emit("bookingCancelled", booking);
+    }
 
     res.status(200).json(booking);
   } catch (error) {

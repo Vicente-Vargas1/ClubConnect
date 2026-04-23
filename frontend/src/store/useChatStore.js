@@ -25,6 +25,9 @@ export const useChatStore = create((set, get) => ({
   unreadCounts: {}, // { userId: number }
   totalUnread: 0,
 
+  // Typing indicator
+  typingUsers: {}, // { userId: true }
+
   getUsers: async () => {
     set({ isUsersLoading: true });
     try {
@@ -148,6 +151,16 @@ export const useChatStore = create((set, get) => ({
     }
   },
 
+  sendTyping: (toUserId) => {
+    const socket = useAuthStore.getState().socket;
+    if (socket) socket.emit("typing", { to: toUserId });
+  },
+
+  stopTyping: (toUserId) => {
+    const socket = useAuthStore.getState().socket;
+    if (socket) socket.emit("stopTyping", { to: toUserId });
+  },
+
   // Call once after socket connects — handles popup delivery + unread badges
   clearPendingPopupMessage: () => set({ pendingPopupMessage: null }),
 
@@ -174,6 +187,28 @@ export const useChatStore = create((set, get) => ({
       set({
         unreadCounts: newUnread,
         totalUnread: Object.values(newUnread).reduce((s, c) => s + c, 0),
+      });
+    });
+
+    socket.on("typing", ({ from }) => {
+      set((s) => ({ typingUsers: { ...s.typingUsers, [from]: true } }));
+    });
+
+    socket.on("stopTyping", ({ from }) => {
+      set((s) => {
+        const next = { ...s.typingUsers };
+        delete next[from];
+        return { typingUsers: next };
+      });
+    });
+
+    socket.on("messagesRead", ({ by }) => {
+      const { popupMessages } = get();
+      set({
+        popupMessages: popupMessages.map((m) => {
+          const receiverId = typeof m.receiverId === "object" ? m.receiverId?.toString() : m.receiverId;
+          return receiverId === by ? { ...m, read: true } : m;
+        }),
       });
     });
   },

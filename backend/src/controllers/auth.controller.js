@@ -172,7 +172,16 @@ export const updateProfileData = async (req, res) => {
     if (!user) return res.status(404).json({ message: "User not found" });
 
     if (user.role === "dj") {
-      const { bio, location, genres, instagram, soundcloud } = req.body;
+      const { bio, location, genres, instagram, soundcloud, availableForBookings, audioPreview } = req.body;
+
+      let audioPreviewUrl = user.profile?.dj?.audioPreview || "";
+      if (audioPreview === "") {
+        audioPreviewUrl = "";
+      } else if (audioPreview && audioPreview.startsWith("data:")) {
+        const uploadRes = await cloudinary.uploader.upload(audioPreview, { resource_type: "auto" });
+        audioPreviewUrl = uploadRes.secure_url;
+      }
+
       user.profile = {
         ...user.profile?.toObject?.() || user.profile,
         dj: {
@@ -182,6 +191,8 @@ export const updateProfileData = async (req, res) => {
           ...(genres !== undefined && { genres }),
           ...(instagram !== undefined && { instagram }),
           ...(soundcloud !== undefined && { soundcloud }),
+          ...(availableForBookings !== undefined && { availableForBookings }),
+          audioPreview: audioPreviewUrl,
         },
       };
     } else if (user.role === "venue") {
@@ -229,7 +240,7 @@ export const searchUsers = async (req, res) => {
       fullName: { $regex: q, $options: "i" },
       _id: { $ne: req.user._id },
     })
-      .select("fullName profilePic role _id")
+      .select("fullName profilePic role _id profile")
       .limit(8);
     res.status(200).json(users);
   } catch (error) {
