@@ -56,6 +56,7 @@ export const useBookingStore = create((set, get) => ({
       const res = await axiosInstance.put(`/bookings/${id}/accept`);
       set({
         bookings: get().bookings.map((b) => (b._id === id ? res.data : b)),
+        pendingCount: Math.max(0, get().pendingCount - 1),
       });
       toast.success("Booking accepted!");
       return res.data;
@@ -69,6 +70,7 @@ export const useBookingStore = create((set, get) => ({
       const res = await axiosInstance.put(`/bookings/${id}/decline`);
       set({
         bookings: get().bookings.map((b) => (b._id === id ? res.data : b)),
+        pendingCount: Math.max(0, get().pendingCount - 1),
       });
       toast.success("Booking declined");
     } catch (error) {

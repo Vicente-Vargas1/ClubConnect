@@ -85,6 +85,16 @@ export const useSocialStore = create((set, get) => ({
     }
   },
 
+  updatePostInterested: (postId, interestedUsers) => {
+    set({
+      posts: get().posts.map((p) =>
+        p._id === postId
+          ? { ...p, lookingForDJ: { ...p.lookingForDJ, interestedUsers } }
+          : p
+      ),
+    });
+  },
+
   setSortBy: (sortBy) => set({ sortBy }),
 
   getSortedPosts: () => {

@@ -1,4 +1,4 @@
-import { useRef, useState } from "react";
+import { useRef, useState, useEffect, useCallback } from "react";
 import { Image, MapPin, X, Music } from "lucide-react";
 import { MapContainer, TileLayer, Marker, useMapEvents } from "react-leaflet";
 import L from "leaflet";
@@ -6,6 +6,7 @@ import "leaflet/dist/leaflet.css";
 import toast from "react-hot-toast";
 import { useSocialStore } from "../store/useSocialStore";
 import { useAuthStore } from "../store/useAuthStore";
+import { axiosInstance } from "../lib/axios";
 import vinylImage from "../assets/vinyl.png";
 
 // Fix default marker icons for Vite
@@ -27,6 +28,51 @@ const CreatePost = () => {
 
   const [text, setText] = useState("");
   const [imagePreview, setImagePreview] = useState(null);
+
+  // @ mention state
+  const [mentionQuery, setMentionQuery] = useState("");
+  const [mentionUsers, setMentionUsers] = useState([]);
+  const [showMentionDropdown, setShowMentionDropdown] = useState(false);
+  const [mentionAtIndex, setMentionAtIndex] = useState(-1);
+  const textareaRef = useRef(null);
+
+  const fetchMentionUsers = useCallback(async (q) => {
+    if (!q && q !== "") return;
+    try {
+      const res = await axiosInstance.get(`/auth/search-users?q=${encodeURIComponent(q)}`);
+      setMentionUsers(res.data);
+    } catch {
+      setMentionUsers([]);
+    }
+  }, []);
+
+  const handleTextChange = (e) => {
+    const val = e.target.value;
+    setText(val);
+    const cursor = e.target.selectionStart;
+    const before = val.slice(0, cursor);
+    const atMatch = before.match(/@([^@\n]*)$/);
+    if (atMatch) {
+      const q = atMatch[1];
+      setMentionAtIndex(cursor - atMatch[0].length);
+      setMentionQuery(q);
+      setShowMentionDropdown(true);
+      fetchMentionUsers(q);
+    } else {
+      setShowMentionDropdown(false);
+    }
+  };
+
+  const handleSelectMention = (user) => {
+    const before = text.slice(0, mentionAtIndex);
+    const after = text.slice(mentionAtIndex + 1 + mentionQuery.length);
+    const mention = `@[${user.fullName}](${user._id})`;
+    const newText = before + mention + after;
+    setText(newText);
+    setShowMentionDropdown(false);
+    setMentionUsers([]);
+    textareaRef.current?.focus();
+  };
   const [showLocationPicker, setShowLocationPicker] = useState(false);
   const [locationName, setLocationName] = useState("");
   const [pickedLatLng, setPickedLatLng] = useState(null);
@@ -197,23 +243,61 @@ const CreatePost = () => {
           )}
 
           {!isLookingForDJ && (
-            <textarea
-              value={text}
-              onChange={(e) => setText(e.target.value)}
-              placeholder="What's on your mind?"
-              rows={2}
-              className="textarea textarea-bordered w-full resize-none text-sm"
-            />
+            <div className="relative">
+              <textarea
+                ref={textareaRef}
+                value={text}
+                onChange={handleTextChange}
+                placeholder="What's on your mind?"
+                rows={2}
+                className="textarea textarea-bordered w-full resize-none text-sm"
+              />
+              {showMentionDropdown && mentionUsers.length > 0 && (
+                <div className="absolute z-50 bg-base-100 border border-base-300 rounded-lg shadow-lg w-full max-h-48 overflow-y-auto">
+                  {mentionUsers.map((u) => (
+                    <button
+                      key={u._id}
+                      type="button"
+                      onMouseDown={(e) => { e.preventDefault(); handleSelectMention(u); }}
+                      className="w-full flex items-center gap-2 px-3 py-2 hover:bg-base-200 text-left"
+                    >
+                      <img src={u.profilePic || vinylImage} className="size-6 rounded-full object-cover" />
+                      <span className="text-sm font-medium">{u.fullName}</span>
+                      <span className="text-xs text-base-content/50 capitalize ml-auto">{u.role}</span>
+                    </button>
+                  ))}
+                </div>
+              )}
+            </div>
           )}
 
           {isLookingForDJ && (
-            <textarea
-              value={text}
-              onChange={(e) => setText(e.target.value)}
-              placeholder="Additional details… (optional)"
-              rows={1}
-              className="textarea textarea-bordered w-full resize-none text-sm"
-            />
+            <div className="relative">
+              <textarea
+                ref={textareaRef}
+                value={text}
+                onChange={handleTextChange}
+                placeholder="Additional details… (optional)"
+                rows={1}
+                className="textarea textarea-bordered w-full resize-none text-sm"
+              />
+              {showMentionDropdown && mentionUsers.length > 0 && (
+                <div className="absolute z-50 bg-base-100 border border-base-300 rounded-lg shadow-lg w-full max-h-48 overflow-y-auto">
+                  {mentionUsers.map((u) => (
+                    <button
+                      key={u._id}
+                      type="button"
+                      onMouseDown={(e) => { e.preventDefault(); handleSelectMention(u); }}
+                      className="w-full flex items-center gap-2 px-3 py-2 hover:bg-base-200 text-left"
+                    >
+                      <img src={u.profilePic || vinylImage} className="size-6 rounded-full object-cover" />
+                      <span className="text-sm font-medium">{u.fullName}</span>
+                      <span className="text-xs text-base-content/50 capitalize ml-auto">{u.role}</span>
+                    </button>
+                  ))}
+                </div>
+              )}
+            </div>
           )}
 
           {/* Image preview */}

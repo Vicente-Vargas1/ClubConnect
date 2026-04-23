@@ -5,7 +5,8 @@ import {
   logout,
   signup,
   updateProfile,
-  getUserById
+  getUserById,
+  searchUsers,
 } from "../controllers/auth.controller.js";
 
 import { protectRoute } from "../middleware/auth.middleware.js";
@@ -20,7 +21,7 @@ router.put("/update-profile", protectRoute, updateProfile);
 
 router.get("/check", protectRoute, checkAuth);
 
-// 🔥 NEW
+router.get("/search-users", protectRoute, searchUsers);
 router.get("/user/:id", protectRoute, getUserById);
 
 export default router;

@@ -1,3 +1,19 @@
+// Parse @[Name](id) mentions in post text into segments for rendering
+export function parseMentions(text) {
+  if (!text) return [{ type: "text", value: "" }];
+  const parts = [];
+  const regex = /@\[([^\]]+)\]\(([^)]+)\)/g;
+  let last = 0;
+  let match;
+  while ((match = regex.exec(text)) !== null) {
+    if (match.index > last) parts.push({ type: "text", value: text.slice(last, match.index) });
+    parts.push({ type: "mention", name: match[1], id: match[2] });
+    last = match.index + match[0].length;
+  }
+  if (last < text.length) parts.push({ type: "text", value: text.slice(last) });
+  return parts;
+}
+
 export function formatTimeTo12Hr(timeStr) {
   if (!timeStr) return "";
   const match = timeStr.match(/^(\d{1,2}):(\d{2})$/);

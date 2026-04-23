@@ -2,6 +2,7 @@ import { Link } from "react-router-dom";
 import { useEffect } from "react";
 import { useAuthStore } from "../store/useAuthStore";
 import { useBookingStore } from "../store/useBookingStore";
+import { useChatStore } from "../store/useChatStore";
 import {
   LogOut,
   MessageSquare,
@@ -15,6 +16,7 @@ import {
 const Navbar = () => {
   const { logout, authUser } = useAuthStore();
   const { pendingCount, fetchPendingCount } = useBookingStore();
+  const { totalUnread } = useChatStore();
 
   useEffect(() => {
     if (authUser) fetchPendingCount();
@@ -52,9 +54,14 @@ const Navbar = () => {
 
             {/* 💬 CHAT BUTTON */}
             {authUser && (
-              <Link to="/chat" className="btn btn-sm gap-2 transition-colors">
+              <Link to="/chat" className="btn btn-sm gap-2 transition-colors relative">
                 <MessageCircle className="w-4 h-4" />
                 <span className="hidden sm:inline">Chat</span>
+                {totalUnread > 0 && (
+                  <span className="absolute -top-1 -right-1 size-5 rounded-full bg-error text-error-content text-xs font-bold flex items-center justify-center">
+                    {totalUnread > 9 ? "9+" : totalUnread}
+                  </span>
+                )}
               </Link>
             )}
 

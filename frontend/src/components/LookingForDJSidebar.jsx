@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { Calendar, Clock, DollarSign, Music } from "lucide-react";
 import { axiosInstance } from "../lib/axios";
 import { useAuthStore } from "../store/useAuthStore";
+import { useSocialStore } from "../store/useSocialStore";
 import { formatTimeTo12Hr } from "../lib/utils";
 import vinylImage from "../assets/vinyl.png";
 import { Link } from "react-router-dom";
@@ -9,6 +10,7 @@ import toast from "react-hot-toast";
 
 const LookingForDJSidebar = () => {
   const { authUser } = useAuthStore();
+  const { updatePostInterested } = useSocialStore();
   const [posts, setPosts] = useState([]);
   const [loading, setLoading] = useState(true);
 
@@ -36,6 +38,7 @@ const LookingForDJSidebar = () => {
             : p
         )
       );
+      updatePostInterested(post._id, res.data.interestedUsers);
     } catch (err) {
       toast.error(err.response?.data?.message || "Failed to update interest");
     }

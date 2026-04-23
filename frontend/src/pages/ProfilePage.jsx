@@ -48,7 +48,8 @@ const ProfilePage = () => {
   const user = isOwnProfile ? authUser : viewUser;
 
   // Follow store
-  const { toggleFollow, isLoading: followLoading } = useFollowStore();
+  const { toggleFollow, isLoading: followLoading, fetchFollowers, fetchFollowing, followersList, followingList } = useFollowStore();
+  const [followModal, setFollowModal] = useState(null); // null | "followers" | "following"
 
   // Review store
   const { reviews, averageRating, totalReviews, fetchReviews, submitReview, deleteReview } =
@@ -175,7 +176,6 @@ const ProfilePage = () => {
 
   const handleAccept = async (bookingId, booking) => {
     const accepted = await acceptBooking(bookingId);
-    fetchPendingCount();
     if (accepted) {
       const otherParty = accepted.senderId;
       const djName = accepted.senderId?.role === "dj" ? accepted.senderId?.fullName : accepted.receiverId?.fullName;
@@ -246,14 +246,26 @@ const ProfilePage = () => {
 
             {/* Follower / Following counts */}
             <div className="flex gap-6 text-center">
-              <div>
+              <button
+                className="hover:opacity-70 transition-opacity"
+                onClick={() => {
+                  fetchFollowers(user._id);
+                  setFollowModal("followers");
+                }}
+              >
                 <p className="font-bold text-lg">{user.followers?.length ?? 0}</p>
                 <p className="text-xs text-base-content/60">Followers</p>
-              </div>
-              <div>
+              </button>
+              <button
+                className="hover:opacity-70 transition-opacity"
+                onClick={() => {
+                  fetchFollowing(user._id);
+                  setFollowModal("following");
+                }}
+              >
                 <p className="font-bold text-lg">{user.following?.length ?? 0}</p>
                 <p className="text-xs text-base-content/60">Following</p>
-              </div>
+              </button>
             </div>
 
             {/* Average Rating */}
@@ -457,7 +469,7 @@ const ProfilePage = () => {
                         booking={b}
                         authUser={authUser}
                         onAccept={() => handleAccept(b._id, b)}
-                        onDecline={() => { declineBooking(b._id); fetchPendingCount(); }}
+                        onDecline={() => declineBooking(b._id)
                       />
                     ))}
                   </div>
@@ -570,6 +582,53 @@ const ProfilePage = () => {
                 {bookingLoading ? <span className="loading loading-spinner loading-sm" /> : "Send Request"}
               </button>
             </form>
+          </div>
+        </div>
+      )}
+
+      {/* FOLLOWERS / FOLLOWING MODAL */}
+      {followModal && (
+        <div
+          className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4"
+          onClick={() => setFollowModal(null)}
+        >
+          <div
+            className="bg-base-100 rounded-xl p-5 w-full max-w-sm max-h-[70vh] flex flex-col"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="flex justify-between items-center mb-4 flex-shrink-0">
+              <h3 className="font-bold text-lg capitalize">{followModal}</h3>
+              <button onClick={() => setFollowModal(null)} className="btn btn-ghost btn-sm btn-circle">
+                <X className="size-4" />
+              </button>
+            </div>
+            <div className="overflow-y-auto flex-1 space-y-2">
+              {followLoading ? (
+                <div className="flex justify-center py-8">
+                  <span className="loading loading-spinner loading-md text-primary" />
+                </div>
+              ) : (followModal === "followers" ? followersList : followingList).length === 0 ? (
+                <p className="text-center text-base-content/50 text-sm py-8">No {followModal} yet.</p>
+              ) : (
+                (followModal === "followers" ? followersList : followingList).map((u) => (
+                  <a
+                    key={u._id}
+                    href={`/profile/${u._id}`}
+                    className="flex items-center gap-3 p-3 bg-base-200 rounded-lg hover:bg-base-300 transition-colors"
+                    onClick={() => setFollowModal(null)}
+                  >
+                    <img
+                      src={u.profilePic || vinylImage}
+                      className="size-10 rounded-full object-cover flex-shrink-0"
+                    />
+                    <div className="flex-1 min-w-0">
+                      <p className="font-semibold text-sm truncate">{u.fullName}</p>
+                      <p className="text-xs text-base-content/50 capitalize">{u.role}</p>
+                    </div>
+                  </a>
+                ))
+              )}
+            </div>
           </div>
         </div>
       )}

@@ -5,19 +5,20 @@ import { useChatStore } from "../store/useChatStore";
 import { axiosInstance } from "../lib/axios";
 import { Heart, MessageCircle, Trash2, Send, Calendar, Clock, MapPin, DollarSign, Music, Check, X } from "lucide-react";
 import vinylImage from "../assets/vinyl.png";
-import { formatMessageTime, formatTimeTo12Hr } from "../lib/utils";
+import { formatMessageTime, formatTimeTo12Hr, parseMentions } from "../lib/utils";
 import { Link } from "react-router-dom";
 import toast from "react-hot-toast";
 
 const PostCard = ({ post }) => {
   const { authUser } = useAuthStore();
-  const { toggleLike, addComment, deletePost } = useSocialStore();
+  const { toggleLike, addComment, deletePost, updatePostInterested } = useSocialStore();
 
   const [showComments, setShowComments] = useState(false);
   const [commentText, setCommentText] = useState("");
-  const [interestedUsers, setInterestedUsers] = useState(post.lookingForDJ?.interestedUsers || []);
   const [interestLoading, setInterestLoading] = useState(false);
   const [showInterestedModal, setShowInterestedModal] = useState(false);
+
+  const interestedUsers = post.lookingForDJ?.interestedUsers || [];
 
   const fallbackAvatar = vinylImage;
 
@@ -58,7 +59,7 @@ const PostCard = ({ post }) => {
     setInterestLoading(true);
     try {
       const res = await axiosInstance.put(`/posts/${post._id}/interested`);
-      setInterestedUsers(res.data.interestedUsers);
+      updatePostInterested(post._id, res.data.interestedUsers);
       toast.success(isInterested ? "Interest removed" : "Interest expressed!");
     } catch (err) {
       toast.error(err.response?.data?.message || "Failed to update interest");
@@ -66,6 +67,17 @@ const PostCard = ({ post }) => {
       setInterestLoading(false);
     }
   };
+
+  const renderText = (text) =>
+    parseMentions(text).map((seg, i) =>
+      seg.type === "mention" ? (
+        <Link key={i} to={`/profile/${seg.id}`} className="text-primary hover:underline font-medium">
+          @{seg.name}
+        </Link>
+      ) : (
+        <span key={i}>{seg.value}</span>
+      )
+    );
 
   const isLookingForDJ = post.postType === "lookingForDJ";
   const djData = post.lookingForDJ;
@@ -149,7 +161,7 @@ const PostCard = ({ post }) => {
           {djData?.eventDescription && (
             <p className="text-sm text-base-content/80">{djData.eventDescription}</p>
           )}
-          {post.text && <p className="text-sm mt-1">{post.text}</p>}
+          {post.text && <p className="text-sm mt-1">{renderText(post.text)}</p>}
         </div>
 
         {post.image && (
@@ -283,7 +295,7 @@ const PostCard = ({ post }) => {
 
       {/* TEXT */}
       {post.text && (
-        <p className="px-4 pb-2 text-sm">{post.text}</p>
+        <p className="px-4 pb-2 text-sm">{renderText(post.text)}</p>
       )}
 
       {/* IMAGE */}

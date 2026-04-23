@@ -163,6 +163,26 @@ export const checkAuth = (req, res) => {
 };
 
 /* =========================
+   SEARCH USERS (for @ mentions)
+========================= */
+export const searchUsers = async (req, res) => {
+  try {
+    const q = (req.query.q || "").trim();
+    if (!q) return res.status(200).json([]);
+    const users = await User.find({
+      fullName: { $regex: q, $options: "i" },
+      _id: { $ne: req.user._id },
+    })
+      .select("fullName profilePic role _id")
+      .limit(8);
+    res.status(200).json(users);
+  } catch (error) {
+    console.log("Error in searchUsers:", error.message);
+    res.status(500).json({ message: "Server error" });
+  }
+};
+
+/* =========================
    GET USER BY ID
 ========================= */
 export const getUserById = async (req, res) => {

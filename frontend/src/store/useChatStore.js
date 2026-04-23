@@ -90,7 +90,20 @@ export const useChatStore = create((set, get) => ({
     }
   },
 
-  setSelectedUser: (selectedUser) => set({ selectedUser }),
+  setSelectedUser: (user) => {
+    if (user) {
+      const { unreadCounts } = get();
+      const newUnread = { ...unreadCounts };
+      delete newUnread[user._id];
+      set({
+        selectedUser: user,
+        unreadCounts: newUnread,
+        totalUnread: Object.values(newUnread).reduce((s, c) => s + c, 0),
+      });
+    } else {
+      set({ selectedUser: user });
+    }
+  },
 
   // ── Popup actions ──────────────────────────────────────────────────────────
 
