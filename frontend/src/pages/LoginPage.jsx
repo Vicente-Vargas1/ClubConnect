@@ -14,7 +14,7 @@ import toast from "react-hot-toast";
 import loginImage from "../assets/dj-controller.png";
 
 const LoginPage = () => {
-  const navigate = useNavigate(); // ✅ ADD THIS
+  const navigate = useNavigate();
 
   const [showPassword, setShowPassword] = useState(false);
   const [formData, setFormData] = useState({
@@ -22,7 +22,7 @@ const LoginPage = () => {
     password: "",
   });
 
-  const { login, isLoggingIn, authUser } = useAuthStore(); // ✅ add authUser
+  const { login, isLoggingIn, authUser } = useAuthStore();
 
   const validateForm = () => {
     if (!formData.email.trim()) return toast.error("Email is required");
@@ -37,7 +37,6 @@ const LoginPage = () => {
     if (validateForm() === true) login(formData);
   };
 
-  // ✅ THIS IS THE FIX (AUTO REDIRECT AFTER LOGIN)
   useEffect(() => {
     if (authUser) {
       navigate("/");
@@ -134,10 +133,10 @@ const LoginPage = () => {
       {/* RIGHT SIDE */}
       <div className="hidden lg:flex flex-col items-center justify-center bg-base-200 p-4">
         <h1 className="text-4xl font-extrabold mb-6">Club Connect</h1>
-        <img src={loginImage} className="w-2/3 max-w-sm rounded-xl" />
+        <img src={loginImage} alt="DJ Controller" className="w-2/3 max-w-sm rounded-xl" />
         <h2 className="text-3xl font-bold mt-4">Welcome Back!</h2>
         <p className="text-base-content/70 text-center mt-2 max-w-sm">
-          Sign in to continue your conversations and catch up with your messages.
+          Sign in to connect with DJs and venues, manage bookings, and discover events.
         </p>
       </div>
 

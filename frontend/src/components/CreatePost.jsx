@@ -246,63 +246,32 @@ const CreatePost = () => {
             </div>
           )}
 
-          {!isLookingForDJ && (
-            <div className="relative">
-              <textarea
-                ref={textareaRef}
-                value={text}
-                onChange={handleTextChange}
-                placeholder="What's on your mind?"
-                rows={2}
-                className="textarea textarea-bordered w-full resize-none text-sm"
-              />
-              {showMentionDropdown && mentionUsers.length > 0 && (
-                <div className="absolute z-50 bg-base-100 border border-base-300 rounded-lg shadow-lg w-full max-h-48 overflow-y-auto">
-                  {mentionUsers.map((u) => (
-                    <button
-                      key={u._id}
-                      type="button"
-                      onMouseDown={(e) => { e.preventDefault(); handleSelectMention(u); }}
-                      className="w-full flex items-center gap-2 px-3 py-2 hover:bg-base-200 text-left"
-                    >
-                      <img src={u.profilePic || vinylImage} className="size-6 rounded-full object-cover" />
-                      <span className="text-sm font-medium">{u.fullName}</span>
-                      <span className="text-xs text-base-content/50 capitalize ml-auto">{u.role}</span>
-                    </button>
-                  ))}
-                </div>
-              )}
-            </div>
-          )}
-
-          {isLookingForDJ && (
-            <div className="relative">
-              <textarea
-                ref={textareaRef}
-                value={text}
-                onChange={handleTextChange}
-                placeholder="Additional details… (optional)"
-                rows={1}
-                className="textarea textarea-bordered w-full resize-none text-sm"
-              />
-              {showMentionDropdown && mentionUsers.length > 0 && (
-                <div className="absolute z-50 bg-base-100 border border-base-300 rounded-lg shadow-lg w-full max-h-48 overflow-y-auto">
-                  {mentionUsers.map((u) => (
-                    <button
-                      key={u._id}
-                      type="button"
-                      onMouseDown={(e) => { e.preventDefault(); handleSelectMention(u); }}
-                      className="w-full flex items-center gap-2 px-3 py-2 hover:bg-base-200 text-left"
-                    >
-                      <img src={u.profilePic || vinylImage} className="size-6 rounded-full object-cover" />
-                      <span className="text-sm font-medium">{u.fullName}</span>
-                      <span className="text-xs text-base-content/50 capitalize ml-auto">{u.role}</span>
-                    </button>
-                  ))}
-                </div>
-              )}
-            </div>
-          )}
+          <div className="relative">
+            <textarea
+              ref={textareaRef}
+              value={text}
+              onChange={handleTextChange}
+              placeholder={isLookingForDJ ? "Additional details… (optional)" : "What's on your mind?"}
+              rows={isLookingForDJ ? 1 : 2}
+              className="textarea textarea-bordered w-full resize-none text-sm"
+            />
+            {showMentionDropdown && mentionUsers.length > 0 && (
+              <div className="absolute z-50 bg-base-100 border border-base-300 rounded-lg shadow-lg w-full max-h-48 overflow-y-auto">
+                {mentionUsers.map((u) => (
+                  <button
+                    key={u._id}
+                    type="button"
+                    onMouseDown={(e) => { e.preventDefault(); handleSelectMention(u); }}
+                    className="w-full flex items-center gap-2 px-3 py-2 hover:bg-base-200 text-left"
+                  >
+                    <img src={u.profilePic || vinylImage} className="size-6 rounded-full object-cover" />
+                    <span className="text-sm font-medium">{u.fullName}</span>
+                    <span className="text-xs text-base-content/50 capitalize ml-auto">{u.role}</span>
+                  </button>
+                ))}
+              </div>
+            )}
+          </div>
 
           {/* Image preview */}
           {imagePreview && (

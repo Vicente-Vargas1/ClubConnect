@@ -27,7 +27,6 @@ const SignUpPage = () => {
   const [role, setRole] = useState(null);
   const [profileData, setProfileData] = useState({});
 
-  // ✅ AUTO REDIRECT FIX
   useEffect(() => {
     if (authUser) {
       navigate("/");
@@ -107,6 +106,20 @@ const SignUpPage = () => {
           {/* FORM */}
           {role && (
             <form onSubmit={handleSubmit} className="space-y-5">
+
+              {/* ROLE INDICATOR + CHANGE */}
+              <div className="flex items-center justify-between bg-base-200 rounded-lg px-4 py-2">
+                <span className="text-sm font-medium capitalize">
+                  {role === "dj" ? "DJ Account" : "Venue Account"}
+                </span>
+                <button
+                  type="button"
+                  onClick={() => setRole(null)}
+                  className="text-xs text-primary hover:underline"
+                >
+                  Change
+                </button>
+              </div>
 
               {/* FULL NAME */}
               <input

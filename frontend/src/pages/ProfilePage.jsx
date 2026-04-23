@@ -4,9 +4,9 @@ import { useSocialStore } from "../store/useSocialStore";
 import { useFollowStore } from "../store/useFollowStore";
 import { useBookingStore } from "../store/useBookingStore";
 import { useReviewStore } from "../store/useReviewStore";
-import { useParams } from "react-router-dom";
+import { useParams, Link } from "react-router-dom";
 import { axiosInstance } from "../lib/axios";
-import { Camera, Mail, User, Star, Calendar, Clock, MapPin, DollarSign, X } from "lucide-react";
+import { Camera, Mail, User, Star, Calendar, Clock, MapPin, DollarSign, X, Instagram, Music2, Globe } from "lucide-react";
 import { formatTimeTo12Hr } from "../lib/utils";
 import vinylImage from "../assets/vinyl.png";
 import PostCard from "../components/PostCard";
@@ -87,8 +87,8 @@ const ProfilePage = () => {
       try {
         const res = await axiosInstance.get(`/auth/user/${id}`);
         setViewUser(res.data);
-      } catch (err) {
-        console.log("Error loading profile:", err);
+      } catch {
+        // silently fail
       }
     };
     fetchUser();
@@ -214,8 +214,8 @@ const ProfilePage = () => {
       if (newPost?._id) {
         await useBookingStore.getState().linkPost(acceptedBooking._id, newPost._id);
       }
-    } catch (err) {
-      console.error(err);
+    } catch {
+      // silently fail
     }
     setShowPostPrompt(false);
     setAcceptedBooking(null);
@@ -338,22 +338,75 @@ const ProfilePage = () => {
 
           {/* DJ PROFILE */}
           {user.role === "dj" && user.profile?.dj && (
-            <div className="bg-base-200 p-4 rounded-lg space-y-2">
+            <div className="bg-base-200 p-4 rounded-lg space-y-3">
               <h2 className="font-semibold">DJ Profile</h2>
-              <p>Location: {user.profile.dj.location}</p>
-              <p>Genres: {user.profile.dj.genres?.join(", ")}</p>
-              <p>Instagram: {user.profile.dj.instagram}</p>
-              <p>SoundCloud: {user.profile.dj.soundcloud}</p>
+              {user.profile.dj.location && (
+                <div className="flex items-center gap-2 text-sm">
+                  <MapPin className="size-4 text-base-content/50 flex-shrink-0" />
+                  <span>{user.profile.dj.location}</span>
+                </div>
+              )}
+              {user.profile.dj.genres?.length > 0 && (
+                <div className="flex items-start gap-2 text-sm">
+                  <Music2 className="size-4 text-base-content/50 flex-shrink-0 mt-0.5" />
+                  <div className="flex flex-wrap gap-1">
+                    {user.profile.dj.genres.map((g) => (
+                      <span key={g} className="badge badge-sm badge-ghost">{g.trim()}</span>
+                    ))}
+                  </div>
+                </div>
+              )}
+              {user.profile.dj.instagram && (
+                <div className="flex items-center gap-2 text-sm">
+                  <Instagram className="size-4 text-base-content/50 flex-shrink-0" />
+                  <a
+                    href={user.profile.dj.instagram.startsWith("http") ? user.profile.dj.instagram : `https://instagram.com/${user.profile.dj.instagram.replace(/^@/, "")}`}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="text-primary hover:underline truncate"
+                  >
+                    {user.profile.dj.instagram}
+                  </a>
+                </div>
+              )}
+              {user.profile.dj.soundcloud && (
+                <div className="flex items-center gap-2 text-sm">
+                  <Globe className="size-4 text-base-content/50 flex-shrink-0" />
+                  <a
+                    href={user.profile.dj.soundcloud.startsWith("http") ? user.profile.dj.soundcloud : `https://soundcloud.com/${user.profile.dj.soundcloud}`}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="text-primary hover:underline truncate"
+                  >
+                    {user.profile.dj.soundcloud}
+                  </a>
+                </div>
+              )}
             </div>
           )}
 
           {/* VENUE PROFILE */}
           {user.role === "venue" && user.profile?.venue && (
-            <div className="bg-base-200 p-4 rounded-lg space-y-2">
+            <div className="bg-base-200 p-4 rounded-lg space-y-3">
               <h2 className="font-semibold">Venue Profile</h2>
-              <p>Location: {user.profile.venue.location}</p>
-              <p>Capacity: {user.profile.venue.capacity}</p>
-              <p>Type: {user.profile.venue.venueType}</p>
+              {user.profile.venue.location && (
+                <div className="flex items-center gap-2 text-sm">
+                  <MapPin className="size-4 text-base-content/50 flex-shrink-0" />
+                  <span>{user.profile.venue.location}</span>
+                </div>
+              )}
+              {user.profile.venue.capacity && (
+                <div className="flex items-center gap-2 text-sm">
+                  <User className="size-4 text-base-content/50 flex-shrink-0" />
+                  <span>Capacity: {user.profile.venue.capacity}</span>
+                </div>
+              )}
+              {user.profile.venue.venueType && (
+                <div className="flex items-center gap-2 text-sm">
+                  <Globe className="size-4 text-base-content/50 flex-shrink-0" />
+                  <span>{user.profile.venue.venueType}</span>
+                </div>
+              )}
             </div>
           )}
 
@@ -639,9 +692,9 @@ const ProfilePage = () => {
                 <p className="text-center text-base-content/50 text-sm py-8">No {followModal} yet.</p>
               ) : (
                 (followModal === "followers" ? followersList : followingList).map((u) => (
-                  <a
+                  <Link
                     key={u._id}
-                    href={`/profile/${u._id}`}
+                    to={`/profile/${u._id}`}
                     className="flex items-center gap-3 p-3 bg-base-200 rounded-lg hover:bg-base-300 transition-colors"
                     onClick={() => setFollowModal(null)}
                   >
@@ -653,7 +706,7 @@ const ProfilePage = () => {
                       <p className="font-semibold text-sm truncate">{u.fullName}</p>
                       <p className="text-xs text-base-content/50 capitalize">{u.role}</p>
                     </div>
-                  </a>
+                  </Link>
                 ))
               )}
             </div>
