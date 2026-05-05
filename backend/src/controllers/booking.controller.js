@@ -20,7 +20,6 @@ export const createBooking = async (req, res) => {
       { path: "receiverId", select: "fullName profilePic role" },
     ]);
 
-    // Persist notification
     await Notification.create({
       recipientId: receiverId,
       senderId: senderId,
@@ -29,7 +28,6 @@ export const createBooking = async (req, res) => {
       bookingId: booking._id,
     });
 
-    // Notify the receiver in real-time
     const receiverSocketId = getReceiverSocketId(receiverId.toString());
     if (receiverSocketId) {
       io.to(receiverSocketId).emit("newBookingRequest", booking);
@@ -93,7 +91,6 @@ export const acceptBooking = async (req, res) => {
       { path: "receiverId", select: "fullName profilePic role" },
     ]);
 
-    // Persist notification
     await Notification.create({
       recipientId: booking.senderId._id,
       senderId: booking.receiverId._id,
@@ -102,7 +99,6 @@ export const acceptBooking = async (req, res) => {
       bookingId: booking._id,
     });
 
-    // Notify sender that booking was accepted
     const senderSocketId = getReceiverSocketId(booking.senderId._id.toString());
     if (senderSocketId) {
       io.to(senderSocketId).emit("bookingAccepted", booking);
@@ -164,7 +160,6 @@ export const cancelBooking = async (req, res) => {
 
     booking.status = "cancelled";
 
-    // Delete the linked auto-post if it exists
     if (booking.autoPostId) {
       await Post.findByIdAndDelete(booking.autoPostId);
       booking.autoPostId = null;

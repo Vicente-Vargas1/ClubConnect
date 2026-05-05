@@ -39,12 +39,9 @@ app.use("/api/reviews", reviewRoutes);
 app.use("/api/bookings", bookingRoutes);
 app.use("/api/notifications", notificationRoutes);
 
-// ✅ Production frontend serving
 if (process.env.NODE_ENV === "production") {
-  // Serve static files from frontend build
   app.use(express.static(path.join(__dirname, "../frontend/dist")));
 
-  // Fix wildcard route for modern Express
   app.get(/.*/, (req, res) => {
     res.sendFile(path.join(__dirname, "../frontend/dist", "index.html"));
   });

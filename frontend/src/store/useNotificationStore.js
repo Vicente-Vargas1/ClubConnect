@@ -41,6 +41,5 @@ export const useNotificationStore = create((set, get) => ({
     }
   },
 
-  // Called from socket events to increment count without full refetch
   incrementUnread: () => set((s) => ({ unreadCount: s.unreadCount + 1 })),
 }));

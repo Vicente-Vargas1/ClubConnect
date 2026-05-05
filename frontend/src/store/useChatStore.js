@@ -3,7 +3,7 @@ import toast from "react-hot-toast";
 import { axiosInstance } from "../lib/axios";
 import { useAuthStore } from "./useAuthStore";
 
-// Named ref so unsubscribeFromMessages only removes its own listener
+// kept here so unsubscribe removes only this listener, not all newMessage listeners
 let chatMessageHandler = null;
 
 export const useChatStore = create((set, get) => ({
@@ -14,19 +14,16 @@ export const useChatStore = create((set, get) => ({
   isUsersLoading: false,
   isMessagesLoading: false,
 
-  // Popup state
   isPopupOpen: false,
   popupSelectedUser: null,
   popupMessages: [],
   isPopupMessagesLoading: false,
   pendingPopupMessage: null,
 
-  // Unread tracking
-  unreadCounts: {}, // { userId: number }
+  unreadCounts: {},
   totalUnread: 0,
 
-  // Typing indicator
-  typingUsers: {}, // { userId: true }
+  typingUsers: {},
 
   getUsers: async () => {
     set({ isUsersLoading: true });
@@ -108,8 +105,6 @@ export const useChatStore = create((set, get) => ({
     }
   },
 
-  // ── Popup actions ──────────────────────────────────────────────────────────
-
   togglePopup: () => set((s) => ({ isPopupOpen: !s.isPopupOpen })),
   closePopup: () => set({ isPopupOpen: false, popupSelectedUser: null, popupMessages: [] }),
 
@@ -161,7 +156,6 @@ export const useChatStore = create((set, get) => ({
     if (socket) socket.emit("stopTyping", { to: toUserId });
   },
 
-  // Call once after socket connects — handles popup delivery + unread badges
   clearPendingPopupMessage: () => set({ pendingPopupMessage: null }),
 
   subscribeToGlobalMessages: () => {
@@ -170,16 +164,13 @@ export const useChatStore = create((set, get) => ({
     socket.on("newMessage", (newMessage) => {
       const { popupSelectedUser, popupMessages, selectedUser, unreadCounts } = get();
 
-      // Deliver to open popup chat
       if (popupSelectedUser && newMessage.senderId === popupSelectedUser._id) {
         set({ popupMessages: [...popupMessages, newMessage] });
         return;
       }
 
-      // Already handled by the full-page chat handler
       if (selectedUser && newMessage.senderId === selectedUser._id) return;
 
-      // Track as unread
       const newUnread = {
         ...unreadCounts,
         [newMessage.senderId]: (unreadCounts[newMessage.senderId] || 0) + 1,

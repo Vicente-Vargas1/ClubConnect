@@ -63,11 +63,9 @@ const SignUpPage = () => {
   return (
     <div className="min-h-screen grid lg:grid-cols-2 gap-0">
 
-      {/* LEFT SIDE */}
       <div className="flex flex-col justify-center items-center p-6 sm:p-8 lg:p-10">
         <div className="w-full max-w-lg space-y-8">
 
-          {/* HEADER */}
           <div className="text-center">
             <div className="flex flex-col items-center gap-2">
               <div className="size-12 rounded-xl bg-primary/10 flex items-center justify-center">
@@ -78,7 +76,6 @@ const SignUpPage = () => {
             </div>
           </div>
 
-          {/* ROLE SELECT */}
           {!role && (
             <div className="text-center space-y-4">
               <h2 className="text-xl font-semibold">
@@ -103,11 +100,9 @@ const SignUpPage = () => {
             </div>
           )}
 
-          {/* FORM */}
           {role && (
             <form onSubmit={handleSubmit} className="space-y-5">
 
-              {/* ROLE INDICATOR + CHANGE */}
               <div className="flex items-center justify-between bg-base-200 rounded-lg px-4 py-2">
                 <span className="text-sm font-medium capitalize">
                   {role === "dj" ? "DJ Account" : "Venue Account"}
@@ -121,7 +116,6 @@ const SignUpPage = () => {
                 </button>
               </div>
 
-              {/* FULL NAME */}
               <input
                 type="text"
                 placeholder="Full Name"
@@ -132,7 +126,6 @@ const SignUpPage = () => {
                 }
               />
 
-              {/* EMAIL */}
               <input
                 type="email"
                 placeholder="Email"
@@ -143,7 +136,6 @@ const SignUpPage = () => {
                 }
               />
 
-              {/* PASSWORD */}
               <div className="relative">
                 <input
                   type={showPassword ? "text" : "password"}
@@ -164,7 +156,6 @@ const SignUpPage = () => {
                 </button>
               </div>
 
-              {/* DJ FIELDS */}
               {role === "dj" && (
                 <div className="space-y-3">
                   <input
@@ -213,7 +204,6 @@ const SignUpPage = () => {
                 </div>
               )}
 
-              {/* VENUE FIELDS */}
               {role === "venue" && (
                 <div className="space-y-3">
                   <input
@@ -252,7 +242,6 @@ const SignUpPage = () => {
                 </div>
               )}
 
-              {/* SUBMIT */}
               <button
                 type="submit"
                 disabled={isSigningUp}
@@ -267,7 +256,6 @@ const SignUpPage = () => {
             </form>
           )}
 
-          {/* LOGIN LINK */}
           <p className="text-center text-sm text-base-content/60">
             Already have an account?{" "}
             <Link to="/login" className="text-purple-600">
@@ -277,7 +265,6 @@ const SignUpPage = () => {
         </div>
       </div>
 
-      {/* RIGHT SIDE */}
       <div className="hidden lg:flex flex-col items-center justify-center bg-base-200">
         <h1 className="text-4xl font-bold mb-8">Club Connect</h1>
 

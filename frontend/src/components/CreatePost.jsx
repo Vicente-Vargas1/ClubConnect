@@ -9,7 +9,7 @@ import { useAuthStore } from "../store/useAuthStore";
 import { axiosInstance } from "../lib/axios";
 import vinylImage from "../assets/vinyl.png";
 
-// Fix default marker icons for Vite
+// leaflet icons break with vite bundling without this
 delete L.Icon.Default.prototype._getIconUrl;
 L.Icon.Default.mergeOptions({
   iconUrl: "https://unpkg.com/leaflet@1.9.4/dist/images/marker-icon.png",
@@ -32,7 +32,6 @@ const CreatePost = () => {
   const [audioFileName, setAudioFileName] = useState("");
   const audioInputRef = useRef(null);
 
-  // @ mention state
   const [mentionQuery, setMentionQuery] = useState("");
   const [mentionUsers, setMentionUsers] = useState([]);
   const [showMentionDropdown, setShowMentionDropdown] = useState(false);
@@ -81,7 +80,6 @@ const CreatePost = () => {
   const [pickedLatLng, setPickedLatLng] = useState(null);
   const fileInputRef = useRef(null);
 
-  // Looking for DJ mode (venue only)
   const [isLookingForDJ, setIsLookingForDJ] = useState(false);
   const [djForm, setDjForm] = useState({
     date: "",
@@ -185,7 +183,6 @@ const CreatePost = () => {
         />
         <form onSubmit={handleSubmit} className="flex-1 space-y-3">
 
-          {/* Looking for DJ toggle (venue only) */}
           {authUser?.role === "venue" && (
             <div className="flex items-center gap-2">
               <button
@@ -199,7 +196,6 @@ const CreatePost = () => {
             </div>
           )}
 
-          {/* Looking for DJ fields */}
           {isLookingForDJ && (
             <div className="bg-secondary/10 border border-secondary/30 rounded-lg p-3 space-y-2">
               <p className="text-xs font-semibold text-secondary uppercase tracking-wide">DJ Booking Request</p>
@@ -299,7 +295,6 @@ const CreatePost = () => {
             )}
           </div>
 
-          {/* Image preview */}
           {imagePreview && (
             <div className="relative w-full">
               <img
@@ -317,7 +312,6 @@ const CreatePost = () => {
             </div>
           )}
 
-          {/* Audio preview */}
           {audioPreview && (
             <div className="flex items-center gap-2 bg-base-200 rounded-lg px-3 py-2">
               <Mic className="size-4 text-primary flex-shrink-0" />
@@ -328,7 +322,6 @@ const CreatePost = () => {
             </div>
           )}
 
-          {/* Location picker */}
           {showLocationPicker && (
             <div className="space-y-2 border border-base-300 rounded-lg p-3">
               <div className="flex items-center gap-2">
@@ -369,7 +362,6 @@ const CreatePost = () => {
             </div>
           )}
 
-          {/* Toolbar */}
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-1">
               <button

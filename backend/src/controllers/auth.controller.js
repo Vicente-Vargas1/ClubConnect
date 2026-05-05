@@ -3,9 +3,6 @@ import User from "../models/user.model.js";
 import bcrypt from "bcryptjs";
 import cloudinary from "../lib/cloudinary.js";
 
-/* =========================
-   SIGNUP
-========================= */
 export const signup = async (req, res) => {
   const { fullName, email, password, role, profile } = req.body;
 
@@ -36,7 +33,6 @@ export const signup = async (req, res) => {
       password: hashedPassword,
       role,
 
-      // ✅ SAFE PROFILE STRUCTURE
       profile:
         role === "dj"
           ? { dj: profile || {} }
@@ -64,9 +60,6 @@ export const signup = async (req, res) => {
   }
 };
 
-/* =========================
-   LOGIN
-========================= */
 export const login = async (req, res) => {
   const { email, password } = req.body;
 
@@ -100,9 +93,6 @@ export const login = async (req, res) => {
   }
 };
 
-/* =========================
-   LOGOUT
-========================= */
 export const logout = (req, res) => {
   try {
     res.cookie("jwt", "", { maxAge: 0 });
@@ -113,9 +103,6 @@ export const logout = (req, res) => {
   }
 };
 
-/* =========================
-   UPDATE PROFILE PIC
-========================= */
 export const updateProfile = async (req, res) => {
   try {
     const { profilePic } = req.body;
@@ -133,7 +120,6 @@ export const updateProfile = async (req, res) => {
       { new: true }
     );
 
-    // ✅ CLEAN RESPONSE (IMPORTANT)
     res.status(200).json({
       _id: updatedUser._id,
       fullName: updatedUser.fullName,
@@ -150,9 +136,6 @@ export const updateProfile = async (req, res) => {
   }
 };
 
-/* =========================
-   AUTH CHECK
-========================= */
 export const checkAuth = (req, res) => {
   try {
     res.status(200).json(req.user);
@@ -162,9 +145,6 @@ export const checkAuth = (req, res) => {
   }
 };
 
-/* =========================
-   UPDATE PROFILE FIELDS (bio, location, genres, social links, etc.)
-========================= */
 export const updateProfileData = async (req, res) => {
   try {
     const userId = req.user._id;
@@ -210,7 +190,7 @@ export const updateProfileData = async (req, res) => {
       };
     }
 
-    user.markModified("profile");
+    user.markModified("profile"); // mongoose won't detect nested object changes without this
     await user.save();
 
     res.status(200).json({
@@ -229,9 +209,6 @@ export const updateProfileData = async (req, res) => {
   }
 };
 
-/* =========================
-   SEARCH USERS (for @ mentions)
-========================= */
 export const searchUsers = async (req, res) => {
   try {
     const q = (req.query.q || "").trim();
@@ -249,9 +226,6 @@ export const searchUsers = async (req, res) => {
   }
 };
 
-/* =========================
-   GET USER BY ID
-========================= */
 export const getUserById = async (req, res) => {
   try {
     const user = await User.findById(req.params.id).select("-password");

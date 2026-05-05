@@ -3,7 +3,6 @@ import User from "../models/user.model.js";
 import Notification from "../models/notification.model.js";
 import cloudinary from "../lib/cloudinary.js";
 
-// Get posts from followed users only
 export const getFollowingPosts = async (req, res) => {
   try {
     const currentUser = await User.findById(req.user._id);
@@ -22,7 +21,6 @@ export const getFollowingPosts = async (req, res) => {
   }
 };
 
-// Get liked posts for authenticated user
 export const getLikedPosts = async (req, res) => {
   try {
     const userId = req.user._id;
@@ -39,7 +37,6 @@ export const getLikedPosts = async (req, res) => {
   }
 };
 
-// Get all posts (feed), newest first
 export const getPosts = async (req, res) => {
   try {
     const posts = await Post.find()
@@ -55,7 +52,6 @@ export const getPosts = async (req, res) => {
   }
 };
 
-// Create a new post
 export const createPost = async (req, res) => {
   try {
     const { text, image, audio, location, postType, lookingForDJ } = req.body;
@@ -104,7 +100,6 @@ export const createPost = async (req, res) => {
   }
 };
 
-// Toggle like on a post
 export const toggleLike = async (req, res) => {
   try {
     const post = await Post.findById(req.params.id);
@@ -127,7 +122,6 @@ export const toggleLike = async (req, res) => {
   }
 };
 
-// Add a comment to a post
 export const addComment = async (req, res) => {
   try {
     const { text } = req.body;
@@ -150,7 +144,6 @@ export const addComment = async (req, res) => {
   }
 };
 
-// Toggle DJ interest in a "Looking for DJ" post
 export const toggleInterested = async (req, res) => {
   try {
     const post = await Post.findById(req.params.id);
@@ -175,7 +168,6 @@ export const toggleInterested = async (req, res) => {
 
     await post.save();
 
-    // Persist notification + emit socket event to venue owner
     if (!alreadyInterested) {
       await Notification.create({
         recipientId: post.userId,
@@ -205,7 +197,6 @@ export const toggleInterested = async (req, res) => {
   }
 };
 
-// Get open "Looking for DJ" posts (future, unfilled), sorted by soonest date
 export const getOpenDJPosts = async (req, res) => {
   try {
     const posts = await Post.find({
@@ -224,7 +215,6 @@ export const getOpenDJPosts = async (req, res) => {
   }
 };
 
-// Get all posts by a specific user
 export const getPostsByUser = async (req, res) => {
   try {
     const posts = await Post.find({ userId: req.params.userId })
@@ -240,7 +230,6 @@ export const getPostsByUser = async (req, res) => {
   }
 };
 
-// Delete a post (only by owner)
 export const deletePost = async (req, res) => {
   try {
     const post = await Post.findById(req.params.id);

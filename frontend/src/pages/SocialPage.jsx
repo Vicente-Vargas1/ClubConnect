@@ -34,7 +34,6 @@ const SocialPage = () => {
       <div className="max-w-6xl mx-auto px-4">
         <div className="flex gap-6">
 
-          {/* LEFT COLUMN — Upcoming Events + DJ listings (lg+ only) */}
           <aside className="hidden lg:block w-64 flex-shrink-0">
             <div className="sticky top-24 flex flex-col gap-4 max-h-[calc(100vh-7rem)]">
               <div className="flex-1 min-h-0 overflow-hidden">
@@ -46,7 +45,6 @@ const SocialPage = () => {
             </div>
           </aside>
 
-          {/* CENTER COLUMN — Feed */}
           <main className="flex-1 min-w-0 max-w-xl mx-auto space-y-4">
             <h2 className="text-2xl font-bold text-center">Social Feed</h2>
 
@@ -54,7 +52,6 @@ const SocialPage = () => {
 
             <CreatePost />
 
-            {/* Sort / Filter controls */}
             <div className="flex items-center gap-2 flex-wrap">
               <button
                 onClick={() => { setSortBy("newest"); if (feedMode === "following") fetchPosts(); }}
@@ -83,7 +80,6 @@ const SocialPage = () => {
               </button>
             </div>
 
-            {/* Feed */}
             {isLoadingPosts ? (
               <div className="flex justify-center py-12">
                 <Loader className="size-8 animate-spin text-primary" />
@@ -108,7 +104,6 @@ const SocialPage = () => {
             )}
           </main>
 
-          {/* RIGHT COLUMN — Chat Sidebar (lg+ only) */}
           <aside className="hidden lg:block w-72 flex-shrink-0">
             <div className="sticky top-24">
               <ChatSidebar />

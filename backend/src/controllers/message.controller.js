@@ -20,12 +20,10 @@ export const getRecentContacts = async (req, res) => {
   try {
     const myId = req.user._id;
 
-    // Get all messages involving the current user, newest first
     const messages = await Message.find({
       $or: [{ senderId: myId }, { receiverId: myId }],
     }).sort({ createdAt: -1 });
 
-    // Build a map of userId -> most recent message
     const contactMap = new Map();
     for (const msg of messages) {
       const otherId = msg.senderId.equals(myId)
@@ -36,7 +34,6 @@ export const getRecentContacts = async (req, res) => {
       }
     }
 
-    // Fetch all other users, ordered: chatted users first (by recency), then the rest
     const allUsers = await User.find({ _id: { $ne: myId } }).select("-password");
 
     const chattedIds = [...contactMap.keys()];
@@ -51,7 +48,6 @@ export const getRecentContacts = async (req, res) => {
       }
     }
 
-    // Sort chatted users by recency
     chattedUsers.sort((a, b) => {
       const aTime = contactMap.get(a._id.toString())?.createdAt || 0;
       const bTime = contactMap.get(b._id.toString())?.createdAt || 0;
@@ -96,13 +92,11 @@ export const getMessages = async (req, res) => {
       ],
     });
 
-    // Mark all messages sent by the other user to me as read
     await Message.updateMany(
       { senderId: userToChatId, receiverId: myId, read: false },
       { read: true }
     );
 
-    // Tell the sender their messages were read
     const senderSocketId = getReceiverSocketId(userToChatId.toString());
     if (senderSocketId) {
       io.to(senderSocketId).emit("messagesRead", { by: myId.toString() });

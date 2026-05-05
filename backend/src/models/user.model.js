@@ -24,7 +24,6 @@ const userSchema = new mongoose.Schema(
       default: "",
     },
 
-    // ✅ NEW: account type
     role: {
       type: String,
       enum: ["dj", "venue"],
@@ -34,7 +33,6 @@ const userSchema = new mongoose.Schema(
     following: [{ type: mongoose.Schema.Types.ObjectId, ref: "User", default: [] }],
     followers: [{ type: mongoose.Schema.Types.ObjectId, ref: "User", default: [] }],
 
-    // ✅ NEW: role-specific profile data
     profile: {
       dj: {
         location: String,

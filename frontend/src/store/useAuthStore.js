@@ -21,7 +21,6 @@ export const useAuthStore = create((set, get) => ({
     try {
       const res = await axiosInstance.get("/auth/check");
 
-      // ✅ store FULL user object (includes role + profile)
       set({ authUser: res.data });
       get().connectSocket();
     } catch (error) {
@@ -37,7 +36,6 @@ export const useAuthStore = create((set, get) => ({
     try {
       const res = await axiosInstance.post("/auth/signup", data);
 
-      // ✅ ensures role + profile are saved
       set({ authUser: res.data });
 
       toast.success("Account created successfully");
@@ -54,7 +52,6 @@ export const useAuthStore = create((set, get) => ({
     try {
       const res = await axiosInstance.post("/auth/login", data);
 
-      // ✅ includes role + profile now
       set({ authUser: res.data });
 
       toast.success("Logged in successfully");
@@ -85,7 +82,6 @@ export const useAuthStore = create((set, get) => ({
     try {
       const res = await axiosInstance.put("/auth/update-profile", data);
 
-      // ✅ FIX: merge instead of overwrite
       set({
         authUser: {
           ...get().authUser,

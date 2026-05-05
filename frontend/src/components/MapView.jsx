@@ -2,7 +2,7 @@ import { MapContainer, TileLayer, Marker, Popup } from "react-leaflet";
 import L from "leaflet";
 import "leaflet/dist/leaflet.css";
 
-// Fix default marker icons for Vite/webpack bundlers
+// leaflet icons break with vite bundling without this
 delete L.Icon.Default.prototype._getIconUrl;
 L.Icon.Default.mergeOptions({
   iconUrl: "https://unpkg.com/leaflet@1.9.4/dist/images/marker-icon.png",
@@ -10,16 +10,6 @@ L.Icon.Default.mergeOptions({
   shadowUrl: "https://unpkg.com/leaflet@1.9.4/dist/images/marker-shadow.png",
 });
 
-/**
- * Reusable interactive Leaflet map.
- *
- * Props:
- *   center     [lat, lng]   initial map center
- *   zoom       number       initial zoom level
- *   markers    Array<{ id, lat, lng, title?, popupContent? }>
- *   style      object       CSS for the container div
- *   className  string
- */
 const MapView = ({
   center = [20, 0],
   zoom = 2,

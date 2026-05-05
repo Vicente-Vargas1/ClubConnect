@@ -46,7 +46,6 @@ const LoginPage = () => {
   return (
     <div className="min-h-screen grid lg:grid-cols-2 gap-0">
 
-      {/* LEFT SIDE - FORM */}
       <div className="flex flex-col justify-center items-center p-6 sm:p-8 lg:p-10">
         <div className="w-full max-w-lg space-y-10">
 
@@ -62,7 +61,6 @@ const LoginPage = () => {
 
           <form onSubmit={handleSubmit} className="space-y-6">
 
-            {/* EMAIL */}
             <div className="form-control">
               <label className="label">
                 <span className="label-text font-medium">Email</span>
@@ -78,7 +76,6 @@ const LoginPage = () => {
               </div>
             </div>
 
-            {/* PASSWORD */}
             <div className="form-control">
               <label className="label">
                 <span className="label-text font-medium">Password</span>
@@ -101,7 +98,6 @@ const LoginPage = () => {
               </div>
             </div>
 
-            {/* SUBMIT */}
             <button
               type="submit"
               disabled={isLoggingIn}
@@ -130,7 +126,6 @@ const LoginPage = () => {
         </div>
       </div>
 
-      {/* RIGHT SIDE */}
       <div className="hidden lg:flex flex-col items-center justify-center bg-base-200 p-4">
         <h1 className="text-4xl font-extrabold mb-6">Club Connect</h1>
         <img src={loginImage} alt="DJ Controller" className="w-2/3 max-w-sm rounded-xl" />
